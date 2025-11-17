@@ -1,0 +1,184 @@
+import Link from 'next/link'
+import RankingTable from '@/components/RankingTable'
+import { buildRanking } from '@/lib/rankings'
+import { CritereDefinition, Vote } from '@/types'
+import { getServerLocale, translate } from '@/lib/i18nServer'
+import {
+  fetchCritereDefinitions,
+  fetchJourneesBySaison,
+  fetchLatestSaison,
+  fetchMatchesByJourneeIds,
+  fetchVotesByMatchIds,
+} from '@/lib/dataAccess'
+
+async function getLatestSaison() {
+  return fetchLatestSaison()
+}
+
+export default async function ClassementPage() {
+  const locale = await getServerLocale()
+  const t = (key: string) => translate(key, locale)
+  const saison = await getLatestSaison()
+
+  if (!saison) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">{t('classement.title')}</h1>
+        <p className="text-gray-600">{t('classement.noSeason')}</p>
+      </div>
+    )
+  }
+
+  const journees = await fetchJourneesBySaison(saison.id)
+  const journeeIds = journees.map((j) => j.id)
+
+  const matches = await fetchMatchesByJourneeIds(journeeIds)
+
+  const matchIds = matches?.map((m) => m.id) ?? []
+
+  const votes = (await fetchVotesByMatchIds(matchIds)) as Vote[]
+
+  const criteresDefinitions = (await fetchCritereDefinitions()) as unknown as CritereDefinition[]
+
+  const definitions = criteresDefinitions as CritereDefinition[]
+  const arbitreCriteres = definitions.filter((c) => c.categorie === 'arbitre')
+  const generalCriteres = definitions
+
+  const refereeRanking = buildRanking(votes, {
+    criteres: arbitreCriteres,
+    includeCategories: ['arbitre'],
+  })
+
+  const generalRanking = buildRanking(votes, {
+    criteres: generalCriteres,
+    includeCategories: ['arbitre', 'var', 'assistant'],
+  })
+
+  const matchJourneeMap = new Map(
+    (matches || []).map((match) => [match.id, match.journee_id])
+  )
+
+  const votesByJournee = new Map<string, Vote[]>()
+  votes.forEach((vote) => {
+    const journeeId = matchJourneeMap.get(vote.match_id)
+    if (!journeeId) return
+    const group = votesByJournee.get(journeeId) ?? []
+    group.push(vote)
+    votesByJournee.set(journeeId, group)
+  })
+
+  const bestByJournee = journees.map((journee) => {
+    const journeeVotes = votesByJournee.get(journee.id) ?? []
+    const ranking = buildRanking(journeeVotes, {
+      criteres: arbitreCriteres,
+      includeCategories: ['arbitre'],
+    })
+    return { journee, best: ranking[0] ?? null }
+  })
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">{t('classement.title')}</h1>
+          <p className="text-gray-600">
+            {t('classement.seasonLabel')} {saison.nom}
+          </p>
+        </div>
+        <Link
+          href={`/saisons/${saison.id}`}
+          className="text-blue-600 hover:text-blue-800 text-sm"
+        >
+          {t('classement.viewDays')}
+        </Link>
+      </div>
+
+      {refereeRanking.length > 0 && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800 mb-1">{t('classement.bestRefereeOverall')}</p>
+          <p className="text-2xl font-bold text-blue-900">
+            {locale === 'ar' && refereeRanking[0].nom_ar
+              ? refereeRanking[0].nom_ar
+              : refereeRanking[0].nom}
+          </p>
+          <p className="text-sm text-blue-700">
+            {t('common.globalNote')}: {refereeRanking[0].moyenne.toFixed(2)} / 5
+          </p>
+        </div>
+      )}
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-semibold mb-2">{t('classement.refereeRankingTitle')}</h2>
+          <p className="text-sm text-gray-500">{t('classement.refereeRankingDescription')}</p>
+        </div>
+        <RankingTable
+          entries={refereeRanking}
+          criteres={arbitreCriteres}
+          locale={locale}
+          t={t}
+        />
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-semibold mb-2">{t('classement.generalRankingTitle')}</h2>
+          <p className="text-sm text-gray-500">{t('classement.generalRankingDescription')}</p>
+        </div>
+        <RankingTable
+          entries={generalRanking}
+          criteres={generalCriteres}
+          locale={locale}
+          t={t}
+        />
+        {generalRanking[0] && (
+          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <p className="text-sm text-emerald-800 mb-1">{t('classement.bestArbitrageOverall')}</p>
+            <p className="text-2xl font-bold text-emerald-900">
+              {locale === 'ar' && generalRanking[0].nom_ar
+                ? generalRanking[0].nom_ar
+                : generalRanking[0].nom}
+            </p>
+            <p className="text-sm text-emerald-700">
+              {t('common.globalNote')}: {generalRanking[0].moyenne.toFixed(2)} / 5
+            </p>
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-2xl font-semibold">{t('classement.bestByJournee')}</h2>
+        {bestByJournee.length === 0 && (
+          <p className="text-gray-600 text-sm">{t('journee.noVotes')}</p>
+        )}
+        {bestByJournee
+          .filter((item) => item.best)
+          .map(({ journee, best }) => (
+            <div
+              key={journee.id}
+              className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div>
+                <p className="text-sm text-gray-500">
+                  {t('common.matchday')} {journee.numero}
+                </p>
+                <p className="text-lg font-semibold">
+                  {best
+                    ? locale === 'ar' && best.nom_ar
+                      ? best.nom_ar
+                      : best.nom
+                    : t('journee.noVotes')}
+                </p>
+              </div>
+              {best && (
+                <p className="text-blue-600 font-semibold">
+                  {best.moyenne.toFixed(2)} / 5
+                </p>
+              )}
+            </div>
+          ))}
+      </section>
+    </div>
+  )
+}
+

@@ -3,7 +3,9 @@ import { DataSource } from 'typeorm'
 import {
   Arbitre,
   CritereDefinitionEntity,
+  Federation,
   Journee,
+  League,
   Match,
   Saison,
   Team,
@@ -38,7 +40,7 @@ function createDataSource() {
     database: DB_NAME,
     logging: DB_LOGGING === 'true',
     synchronize: DB_SYNCHRONIZE === 'true',
-    entities: [Arbitre, CritereDefinitionEntity, Journee, Match, Saison, Team, Vote],
+    entities: [Arbitre, CritereDefinitionEntity, Federation, League, Journee, Match, Saison, Team, Vote],
     extra: {
       decimalNumbers: true,
     },

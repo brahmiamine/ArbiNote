@@ -6,6 +6,7 @@ export interface Arbitre {
   id: string
   nom: string
   nom_fr?: string | null
+  nom_en?: string | null
   nom_ar?: string | null
   nationalite?: string
   nationalite_ar?: string | null
@@ -18,14 +19,37 @@ export interface Arbitre {
   nombre_votes?: number
 }
 
+export interface Federation {
+  id: string
+  code: string
+  nom: string
+  nom_en?: string | null
+  nom_ar?: string | null
+  logo_url?: string | null
+}
+
+export interface League {
+  id: string
+  federation_id: string
+  nom: string
+  nom_en?: string | null
+  nom_ar?: string | null
+  logo_url?: string | null
+  federation?: Federation
+}
+
 export interface Team {
   id: string
   nom: string
   nom_fr?: string | null
+  nom_en?: string | null
   nom_ar?: string | null
   abbr?: string | null
   city?: string | null
+  city_ar?: string | null
+  city_en?: string | null
   stadium?: string | null
+  stadium_ar?: string | null
   logo_url?: string | null
 }
 
@@ -36,6 +60,8 @@ export interface Saison {
   nom_ar?: string | null
   date_debut?: string | null
   date_fin?: string | null
+  league_id?: string | null
+  league?: League
 }
 
 export interface Journee {
@@ -91,6 +117,7 @@ export interface CritereDefinition {
   id: string
   categorie: CritereCategory
   label_fr: string
+  label_en?: string | null
   label_ar: string
   description_fr?: string | null
   description_ar?: string | null

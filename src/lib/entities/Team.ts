@@ -13,6 +13,9 @@ export class Team {
   nom!: string
 
   @Column({ type: 'varchar', length: 255, nullable: true })
+  nom_en?: string | null
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
   nom_ar?: string | null
 
   @Column({ type: 'varchar', length: 255, nullable: true })
@@ -20,6 +23,9 @@ export class Team {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   city_ar?: string | null
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  city_en?: string | null
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   stadium?: string | null

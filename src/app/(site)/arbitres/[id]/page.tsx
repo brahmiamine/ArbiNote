@@ -72,11 +72,12 @@ export default async function ArbitrePage({
   }
 
   const locale = await getServerLocale()
-  const t = (key: string) => translate(key, locale)
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
   const { arbitre, stats, votes } = data
   const displayName = getLocalizedName(locale, {
     defaultValue: arbitre.nom,
     fr: arbitre.nom,
+    en: arbitre.nom_en ?? undefined,
     ar: arbitre.nom_ar ?? undefined,
   })
   const displayCategory =

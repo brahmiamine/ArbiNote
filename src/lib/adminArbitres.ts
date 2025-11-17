@@ -5,6 +5,7 @@ import { toPlain, toPlainArray } from './serialization'
 
 export interface ArbitreInput {
   nom: string
+  nom_en?: string | null
   nom_ar?: string | null
   nationalite?: string | null
   nationalite_ar?: string | null
@@ -46,6 +47,7 @@ export async function createArbitre(payload: ArbitreInput) {
   const repo = dataSource.getRepository<Arbitre>('arbitres')
   const arbitre = repo.create({
     nom: payload.nom.trim(),
+    nom_en: normalizeString(payload.nom_en),
     nom_ar: normalizeString(payload.nom_ar),
     nationalite: normalizeString(payload.nationalite) ?? 'Tunisie',
     nationalite_ar: normalizeString(payload.nationalite_ar) ?? 'تونس',
@@ -68,6 +70,7 @@ export async function updateArbitre(id: string, payload: ArbitreInput) {
 
   repo.merge(existing, {
     nom: payload.nom?.trim() ?? existing.nom,
+    nom_en: payload.nom_en === undefined ? existing.nom_en : normalizeString(payload.nom_en),
     nom_ar: payload.nom_ar === undefined ? existing.nom_ar : normalizeString(payload.nom_ar),
     nationalite:
       payload.nationalite === undefined ? existing.nationalite : normalizeString(payload.nationalite),
@@ -129,6 +132,7 @@ export async function importArbitres(rows: ArbitreImportInput[]) {
     if (target) {
       repo.merge(target, {
         nom: normalizedName,
+        nom_en: row.nom_en === undefined ? target.nom_en : normalizeString(row.nom_en),
         nom_ar: normalizeString(row.nom_ar),
         nationalite: normalizeString(row.nationalite) ?? target.nationalite,
         nationalite_ar: normalizeString(row.nationalite_ar) ?? target.nationalite_ar,
@@ -141,6 +145,7 @@ export async function importArbitres(rows: ArbitreImportInput[]) {
     } else {
       const created = repo.create({
         nom: normalizedName,
+        nom_en: normalizeString(row.nom_en),
         nom_ar: normalizeString(row.nom_ar),
         nationalite: normalizeString(row.nationalite) ?? 'Tunisie',
         nationalite_ar: normalizeString(row.nationalite_ar) ?? 'تونس',

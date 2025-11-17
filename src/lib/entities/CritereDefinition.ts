@@ -11,6 +11,9 @@ export class CritereDefinitionEntity {
   @Column({ type: 'varchar', length: 255 })
   label_fr!: string
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  label_en?: string | null
+
   @Column({ type: 'varchar', length: 255 })
   label_ar!: string
 

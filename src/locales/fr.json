@@ -18,6 +18,11 @@
   "home.upcoming.title": "Journée {{numero}} à venir",
   "home.upcoming.cta": "Voir la journée →",
   "home.upcoming.notPlayed": "Coup d'envoi à venir",
+  "federationSwitcher.title": "Fédération sélectionnée",
+  "federationSwitcher.noSelection": "Aucune ligue sélectionnée",
+  "federationSwitcher.switching": "Changement en cours...",
+  "federationSwitcher.leagues": "Ligues disponibles",
+  "federationSwitcher.noLeagues": "Aucune ligue pour cette fédération",
 
   "common.error": "Erreur",
   "common.errorConfig": "Assurez-vous que Supabase est configuré et que les tables sont créées.",

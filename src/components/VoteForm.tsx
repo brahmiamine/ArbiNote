@@ -208,7 +208,12 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
             <div key={categorie} className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">{sectionLabel}</h3>
               {list.map((critere) => {
-                const label = locale === "ar" ? critere.label_ar : critere.label_fr;
+                const label =
+                  locale === "ar"
+                    ? critere.label_ar
+                    : locale === "en"
+                    ? critere.label_en ?? critere.label_fr
+                    : critere.label_fr;
                 const description = locale === "ar" ? critere.description_ar : critere.description_fr;
 
                 return (

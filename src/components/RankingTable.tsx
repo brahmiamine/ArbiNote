@@ -1,12 +1,13 @@
 import Image from 'next/image'
 import { RankingEntry } from '@/lib/rankings'
 import { CritereDefinition } from '@/types'
+import { getLocalizedName } from '@/lib/utils'
 
 interface RankingTableProps {
   entries: RankingEntry[]
   criteres: CritereDefinition[]
   locale: string
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
 }
 
 export default function RankingTable({
@@ -33,7 +34,12 @@ export default function RankingTable({
             <th className="px-4 py-3 text-left">{t('classement.globalNote')}</th>
             {criteres.map((critere) => (
               <th key={critere.id} className="px-4 py-3 text-left">
-                {locale === 'ar' ? critere.label_ar : critere.label_fr}
+                {getLocalizedName(locale, {
+                  defaultValue: critere.label_fr,
+                  fr: critere.label_fr,
+                  en: critere.label_en ?? undefined,
+                  ar: critere.label_ar,
+                })}
               </th>
             ))}
             <th className="px-4 py-3 text-left">{t('classement.votesCount')}</th>
@@ -41,8 +47,12 @@ export default function RankingTable({
         </thead>
         <tbody>
           {entries.map((entry, index) => {
-            const displayName =
-              locale === 'ar' && entry.nom_ar ? entry.nom_ar : entry.nom
+            const displayName = getLocalizedName(locale, {
+              defaultValue: entry.nom,
+              fr: entry.nom,
+              en: entry.nom_en ?? undefined,
+              ar: entry.nom_ar ?? undefined,
+            })
 
             return (
               <tr

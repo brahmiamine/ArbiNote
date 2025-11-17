@@ -3,19 +3,17 @@ import { formatDate } from '@/lib/utils'
 import { Saison } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
 import { fetchAllSaisons } from '@/lib/dataAccess'
-
-async function getSaisons(): Promise<Saison[]> {
-  return fetchAllSaisons()
-}
+import { getActiveLeagueId } from '@/lib/leagueSelection'
 
 export default async function SaisonsPage() {
   const locale = await getServerLocale()
-  const t = (key: string) => translate(key, locale)
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
+  const leagueId = await getActiveLeagueId()
   let saisons: Saison[] = []
   let error: string | null = null
 
   try {
-    saisons = await getSaisons()
+    saisons = await fetchAllSaisons(leagueId ?? undefined)
   } catch (err) {
     error = err instanceof Error ? err.message : t('saisons.error')
   }

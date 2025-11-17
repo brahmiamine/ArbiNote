@@ -3,7 +3,9 @@ import { getDataSource } from './db'
 import {
   Arbitre,
   CritereDefinitionEntity,
+  Federation,
   Journee,
+  League,
   Match,
   Saison,
   Team,
@@ -11,20 +13,22 @@ import {
 } from './entities'
 import { toPlain, toPlainArray } from './serialization'
 
-export async function fetchFeaturedSaisons(limit = 2) {
+export async function fetchFeaturedSaisons(limit = 2, leagueId?: string | null) {
   const dataSource = await getDataSource()
   const repo = dataSource.getRepository<Saison>('saisons')
   const rows = await repo.find({
+    where: leagueId ? { league_id: leagueId } : undefined,
     order: { date_debut: 'DESC' },
     take: limit,
   })
   return toPlainArray(rows)
 }
 
-export async function fetchAllSaisons() {
+export async function fetchAllSaisons(leagueId?: string | null) {
   const dataSource = await getDataSource()
   const repo = dataSource.getRepository<Saison>('saisons')
   const rows = await repo.find({
+    where: leagueId ? { league_id: leagueId } : undefined,
     order: { date_debut: 'ASC' },
   })
   return toPlainArray(rows)
@@ -78,19 +82,24 @@ export async function fetchMatchesByJournee(journeeId: string) {
   return toPlainArray(rows)
 }
 
-export async function fetchMatches(limit = 20) {
+export async function fetchMatches(limit = 20, leagueId?: string | null) {
   const dataSource = await getDataSource()
   const repo = dataSource.getRepository<Match>('matches')
-  const rows = await repo.find({
-    relations: {
-      journee: { saison: true },
-      equipe_home: true,
-      equipe_away: true,
-      arbitre: true,
-    },
-    order: { date: 'DESC' },
-    take: limit,
-  })
+  const qb = repo
+    .createQueryBuilder('match')
+    .leftJoinAndSelect('match.journee', 'journee')
+    .leftJoinAndSelect('journee.saison', 'saison')
+    .leftJoinAndSelect('match.equipe_home', 'equipe_home')
+    .leftJoinAndSelect('match.equipe_away', 'equipe_away')
+    .leftJoinAndSelect('match.arbitre', 'arbitre')
+    .orderBy('match.date', 'DESC')
+    .take(limit)
+
+  if (leagueId) {
+    qb.where('saison.league_id = :leagueId', { leagueId })
+  }
+
+  const rows = await qb.getMany()
   return toPlainArray(rows)
 }
 
@@ -177,14 +186,20 @@ export async function fetchCritereDefinitions() {
   return toPlainArray(rows)
 }
 
-export async function fetchLatestSaison() {
+export async function fetchLatestSaison(leagueId?: string | null) {
   const dataSource = await getDataSource()
   const repo = dataSource.getRepository<Saison>('saisons')
-  const rows = await repo.find({
-    order: { date_debut: 'DESC', created_at: 'DESC' },
-    take: 1,
-  })
-  const row = rows[0] ?? null
+  const qb = repo
+    .createQueryBuilder('s')
+    .orderBy('s.date_debut', 'DESC')
+    .addOrderBy('s.created_at', 'DESC')
+    .take(1)
+
+  if (leagueId) {
+    qb.where('s.league_id = :leagueId', { leagueId })
+  }
+
+  const row = await qb.getOne()
   return toPlain(row)
 }
 
@@ -197,20 +212,28 @@ export async function fetchTeams() {
   return toPlainArray(rows)
 }
 
-export async function fetchNextJourneeMatches(referenceDate: Date = new Date()) {
+export async function fetchNextJourneeMatches(referenceDate: Date = new Date(), leagueId?: string | null) {
   const dataSource = await getDataSource()
   const journeeRepo = dataSource.getRepository<Journee>('journees')
   const matchRepo = dataSource.getRepository<Match>('matches')
   const today = referenceDate.toISOString().slice(0, 10)
 
+  const baseQuery = journeeRepo
+    .createQueryBuilder('j')
+    .leftJoinAndSelect('j.saison', 'saison')
+
+  if (leagueId) {
+    baseQuery.where('saison.league_id = :leagueId', { leagueId })
+  }
+
   const nextJournee =
-    (await journeeRepo
-      .createQueryBuilder('j')
-      .where('j.date_journee IS NOT NULL')
+    (await baseQuery
+      .clone()
+      .andWhere('j.date_journee IS NOT NULL')
       .andWhere('j.date_journee >= :today', { today })
       .orderBy('j.date_journee', 'ASC')
       .getOne()) ||
-    (await journeeRepo.createQueryBuilder('j').orderBy('j.date_journee', 'DESC').getOne())
+    (await baseQuery.clone().orderBy('j.date_journee', 'DESC').getOne())
 
   if (!nextJournee) {
     return null
@@ -231,6 +254,26 @@ export async function fetchNextJourneeMatches(referenceDate: Date = new Date()) 
     journee: toPlain(nextJournee),
     matches: toPlainArray(matches),
   }
+}
+
+export async function fetchFederationsWithLeagues() {
+  const dataSource = await getDataSource()
+  const federations = await dataSource.query(
+    'SELECT id, code, nom, nom_en, nom_ar, logo_url FROM federations ORDER BY nom ASC'
+  )
+  const leagues = await dataSource.query(
+    'SELECT id, federation_id, nom, nom_en, nom_ar, logo_url FROM ligues ORDER BY nom ASC'
+  )
+  const leaguesByFederation = new Map<string, League[]>()
+  leagues.forEach((league: League) => {
+    const group = leaguesByFederation.get(league.federation_id) ?? []
+    group.push(league)
+    leaguesByFederation.set(league.federation_id, group)
+  })
+  return federations.map((federation: Federation) => ({
+    ...federation,
+    leagues: leaguesByFederation.get(federation.id) ?? [],
+  }))
 }
 
 

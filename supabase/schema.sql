@@ -15,15 +15,44 @@ DROP TABLE IF EXISTS journees;
 
 DROP TABLE IF EXISTS saisons;
 
+DROP TABLE IF EXISTS ligues;
+
+DROP TABLE IF EXISTS federations;
+
 DROP TABLE IF EXISTS teams;
 
 DROP TABLE IF EXISTS arbitres;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+CREATE TABLE IF NOT EXISTS federations (
+    id CHAR(36) NOT NULL DEFAULT(UUID()),
+    code VARCHAR(8) NOT NULL,
+    nom VARCHAR(255) NOT NULL,
+    nom_en VARCHAR(255),
+    nom_ar VARCHAR(255),
+    logo_url TEXT,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uniq_federations_code (code)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+CREATE TABLE IF NOT EXISTS ligues (
+    id CHAR(36) NOT NULL DEFAULT(UUID()),
+    federation_id CHAR(36) NOT NULL,
+    nom VARCHAR(255) NOT NULL,
+    nom_en VARCHAR(255),
+    nom_ar VARCHAR(255),
+    logo_url TEXT,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_ligues_federation FOREIGN KEY (federation_id) REFERENCES federations (id) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
 CREATE TABLE IF NOT EXISTS arbitres (
     id CHAR(36) NOT NULL DEFAULT(UUID()),
     nom VARCHAR(255) NOT NULL,
+    nom_en VARCHAR(255),
     nom_ar VARCHAR(255),
     nationalite VARCHAR(255),
     nationalite_ar VARCHAR(255),
@@ -39,16 +68,20 @@ CREATE TABLE IF NOT EXISTS saisons (
     nom_ar VARCHAR(255),
     date_debut DATE,
     date_fin DATE,
+    league_id CHAR(36),
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT fk_saisons_league FOREIGN KEY (league_id) REFERENCES ligues (id) ON DELETE SET NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE IF NOT EXISTS teams (
     id CHAR(36) NOT NULL DEFAULT(UUID()),
     abbr VARCHAR(16) UNIQUE,
     nom VARCHAR(255) NOT NULL,
+    nom_en VARCHAR(255),
     nom_ar VARCHAR(255),
     city VARCHAR(255),
+    city_en VARCHAR(255),
     city_ar VARCHAR(255),
     stadium VARCHAR(255),
     stadium_ar VARCHAR(255),
@@ -102,6 +135,7 @@ CREATE TABLE IF NOT EXISTS critere_definitions (
     id VARCHAR(64) NOT NULL,
     categorie ENUM('arbitre', 'var', 'assistant') NOT NULL,
     label_fr VARCHAR(255) NOT NULL,
+    label_en VARCHAR(255),
     label_ar VARCHAR(255) NOT NULL,
     description_fr TEXT,
     description_ar TEXT,

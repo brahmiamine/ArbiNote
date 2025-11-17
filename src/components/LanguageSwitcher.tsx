@@ -5,6 +5,7 @@ import { useTranslations, Locale } from '@/lib/i18n'
 const languages: { code: Locale; label: string }[] = [
   { code: 'fr', label: 'Français' },
   { code: 'ar', label: 'العربية' },
+  { code: 'en', label: 'English' },
 ]
 
 export default function LanguageSwitcher() {

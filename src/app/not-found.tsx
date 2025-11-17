@@ -3,7 +3,7 @@ import { getServerLocale, translate } from '@/lib/i18nServer'
 
 export default async function NotFound() {
   const locale = await getServerLocale()
-  const t = (key: string) => translate(key, locale)
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
 
   return (
     <div className="max-w-2xl mx-auto text-center py-12">

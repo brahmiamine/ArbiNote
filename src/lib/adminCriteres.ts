@@ -6,6 +6,7 @@ export interface CritereInput {
   id: string
   categorie: 'arbitre' | 'var' | 'assistant'
   label_fr: string
+  label_en?: string | null
   label_ar: string
   description_fr?: string | null
   description_ar?: string | null

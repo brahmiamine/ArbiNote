@@ -18,6 +18,11 @@
   "home.upcoming.title": "الجولة {{numero}} القادمة",
   "home.upcoming.cta": "عرض الجولة →",
   "home.upcoming.notPlayed": "المباراة لم تُلعب بعد",
+  "federationSwitcher.title": "الاتحاد المختار",
+  "federationSwitcher.noSelection": "لا توجد بطولة مختارة",
+  "federationSwitcher.switching": "جارٍ التغيير...",
+  "federationSwitcher.leagues": "البطولات المتاحة",
+  "federationSwitcher.noLeagues": "لا توجد بطولات لهذا الاتحاد",
 
   "common.error": "خطأ",
   "common.errorConfig": "تأكد من تهيئة Supabase وإنشاء الجداول.",

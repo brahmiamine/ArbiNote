@@ -38,7 +38,7 @@ export default function HomeClient({ saisons, upcoming }: HomeClientProps) {
               </h3>
               <p className="text-gray-500">
                 {upcoming.journee.date_journee
-                  ? formatDate(upcoming.journee.date_journee)
+                  ? formatDate(upcoming.journee.date_journee, locale)
                   : t('common.datePending')}
               </p>
             </div>
@@ -58,13 +58,17 @@ export default function HomeClient({ saisons, upcoming }: HomeClientProps) {
                 match.score_away !== undefined
 
               const kickoff = match.date
-                ? formatDate(match.date)
+                ? formatDate(match.date, locale)
                 : upcoming.journee.date_journee
-                ? formatDate(upcoming.journee.date_journee)
+                ? formatDate(upcoming.journee.date_journee, locale)
                 : t('common.datePending')
 
               return (
-                <div key={match.id} className="p-4 card rounded-lg space-y-3">
+                <Link
+                  key={match.id}
+                  href={`/matches/${match.id}`}
+                  className="block p-4 card rounded-lg space-y-3 border border-transparent hover:border-blue-200 transition-colors"
+                >
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center justify-between gap-4">
@@ -96,7 +100,7 @@ export default function HomeClient({ saisons, upcoming }: HomeClientProps) {
                       {match.arbitre?.nom ?? t('common.noRefereeAssigned')}
                     </span>
                   </div>
-                </div>
+                </Link>
               )
             })}
           </div>
@@ -141,8 +145,8 @@ export default function HomeClient({ saisons, upcoming }: HomeClientProps) {
                   {saison.nom}
                 </p>
                 <p className="text-sm text-gray-600 mt-1">
-                  {saison.date_debut ? formatDate(saison.date_debut) : '?'} —{' '}
-                  {saison.date_fin ? formatDate(saison.date_fin) : '?'}
+                  {saison.date_debut ? formatDate(saison.date_debut, locale) : '?'} —{' '}
+                  {saison.date_fin ? formatDate(saison.date_fin, locale) : '?'}
                 </p>
                 <p className="text-sm text-gray-500 mt-2">{t('home.viewDays')}</p>
               </Link>
@@ -179,6 +183,7 @@ function TeamDisplay({
   const displayName = getLocalizedName(locale, {
     defaultValue: team.nom,
     fr: team.nom,
+    en: team.nom_en ?? team.nom,
     ar: team.nom_ar ?? team.nom,
   })
   return (
@@ -187,7 +192,7 @@ function TeamDisplay({
         <div className="relative w-10 h-10">
           <Image
             src={team.logo_url}
-            alt={`Logo ${team.nom}`}
+            alt={`Logo ${displayName}`}
             fill
             sizes="40px"
             className="object-contain"

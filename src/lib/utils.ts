@@ -5,9 +5,19 @@
 /**
  * Formate une date selon la locale fournie
  */
+function resolveIntlLocale(locale: string) {
+  if (locale === 'ar') {
+    return 'ar-TN'
+  }
+  if (locale === 'en') {
+    return 'en-GB'
+  }
+  return 'fr-FR'
+}
+
 export function formatDate(date: Date | string, locale: string = 'fr'): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  const intlLocale = locale === 'ar' ? 'ar-TN' : 'fr-FR'
+  const intlLocale = resolveIntlLocale(locale)
   return new Intl.DateTimeFormat(intlLocale, {
     day: '2-digit',
     month: '2-digit',
@@ -22,7 +32,7 @@ export function formatDate(date: Date | string, locale: string = 'fr'): string {
  */
 export function formatDateShort(date: Date | string, locale: string = 'fr'): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  const intlLocale = locale === 'ar' ? 'ar-TN' : 'fr-FR'
+  const intlLocale = resolveIntlLocale(locale)
   return new Intl.DateTimeFormat(intlLocale, {
     day: '2-digit',
     month: '2-digit',
@@ -58,18 +68,23 @@ export function getLocalizedName(
     defaultValue,
     fr,
     ar,
+    en,
   }: {
     defaultValue: string
     fr?: string | null
     ar?: string | null
+    en?: string | null
   }
 ): string {
   if (locale === 'ar' && ar) {
     return ar
   }
+  if (locale === 'en' && en) {
+    return en
+  }
   if (locale === 'fr' && fr) {
     return fr
   }
-  return fr ?? defaultValue
+  return fr ?? en ?? ar ?? defaultValue
 }
 

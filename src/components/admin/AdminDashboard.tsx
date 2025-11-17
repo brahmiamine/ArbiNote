@@ -6,6 +6,7 @@ import type { Arbitre } from '@/types'
 
 interface ArbitreFormState {
   nom: string
+  nom_en: string
   nom_ar: string
   date_naissance: string
   photoFile: File | null
@@ -14,6 +15,7 @@ interface ArbitreFormState {
 
 const emptyForm: ArbitreFormState = {
   nom: '',
+  nom_en: '',
   nom_ar: '',
   date_naissance: '',
   photoFile: null,
@@ -114,6 +116,7 @@ export default function AdminDashboard() {
         credentials: 'include',
         body: JSON.stringify({
           nom: createForm.nom,
+          nom_en: createForm.nom_en || null,
           nom_ar: createForm.nom_ar || null,
           date_naissance: createForm.date_naissance || null,
           photo_url: photoUrl || createForm.photo_url || null,
@@ -136,6 +139,7 @@ export default function AdminDashboard() {
     setEditingId(arbitre.id)
     setEditForm({
       nom: arbitre.nom,
+      nom_en: arbitre.nom_en || '',
       nom_ar: arbitre.nom_ar || '',
       date_naissance: arbitre.date_naissance
         ? arbitre.date_naissance.slice(0, 10)
@@ -162,6 +166,7 @@ export default function AdminDashboard() {
         credentials: 'include',
         body: JSON.stringify({
           nom: editForm.nom,
+          nom_en: editForm.nom_en || null,
           nom_ar: editForm.nom_ar || null,
           date_naissance: editForm.date_naissance || null,
           photo_url: photoUrl || editForm.photo_url || null,
@@ -239,13 +244,22 @@ export default function AdminDashboard() {
           <h3 className="text-xl font-semibold mb-4">Ajouter un arbitre</h3>
           <form className="space-y-4" onSubmit={handleCreate}>
             <div>
-              <label className="block text-sm font-medium mb-1">Nom</label>
+              <label className="block text-sm font-medium mb-1">Nom (français)</label>
               <input
                 type="text"
                 value={createForm.nom}
                 onChange={(e) => setCreateForm((prev) => ({ ...prev, nom: e.target.value }))}
                 className="w-full border rounded px-3 py-2"
                 required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Nom (anglais)</label>
+              <input
+                type="text"
+                value={createForm.nom_en}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, nom_en: e.target.value }))}
+                className="w-full border rounded px-3 py-2"
               />
             </div>
             <div>
@@ -300,7 +314,7 @@ export default function AdminDashboard() {
                 className="w-full"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Colonnes supportées: nom, nom_ar, date_naissance, photo_url, id.
+                Colonnes supportées: nom, nom_en, nom_ar, date_naissance, photo_url, id.
               </p>
             </div>
             {importMessage && <p className="text-sm text-blue-600">{importMessage}</p>}
@@ -327,7 +341,8 @@ export default function AdminDashboard() {
               <thead>
                 <tr className="text-left border-b">
                   <th className="p-2">Nom</th>
-                  <th className="p-2">Nom arabe</th>
+                  <th className="p-2">Nom (anglais)</th>
+                  <th className="p-2">Nom (arabe)</th>
                   <th className="p-2">Naissance</th>
                   <th className="p-2">Photo</th>
                   <th className="p-2" />
@@ -337,6 +352,7 @@ export default function AdminDashboard() {
                 {sortedArbitres.map((arbitre) => (
                   <tr key={arbitre.id} className="border-b last:border-0">
                     <td className="p-2 font-medium">{arbitre.nom}</td>
+                    <td className="p-2">{arbitre.nom_en || '—'}</td>
                     <td className="p-2">{arbitre.nom_ar || '—'}</td>
                     <td className="p-2">
                       {arbitre.date_naissance
@@ -384,13 +400,22 @@ export default function AdminDashboard() {
           <form className="grid md:grid-cols-2 gap-4" onSubmit={handleUpdate}>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Nom</label>
+                <label className="block text-sm font-medium mb-1">Nom (français)</label>
                 <input
                   type="text"
                   value={editForm.nom}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, nom: e.target.value }))}
                   className="w-full border rounded px-3 py-2"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Nom (anglais)</label>
+                <input
+                  type="text"
+                  value={editForm.nom_en}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, nom_en: e.target.value }))}
+                  className="w-full border rounded px-3 py-2"
                 />
               </div>
               <div>

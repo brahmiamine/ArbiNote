@@ -2,19 +2,17 @@ import MatchCard from '@/components/MatchCard'
 import { Match } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
 import { fetchMatches } from '@/lib/dataAccess'
-
-async function getMatches() {
-  return (await fetchMatches(20)) as Match[]
-}
+import { getActiveLeagueId } from '@/lib/leagueSelection'
 
 export default async function MatchesPage() {
   const locale = await getServerLocale()
-  const t = (key: string) => translate(key, locale)
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
+  const leagueId = await getActiveLeagueId()
   let matches: Match[] = []
   let error: string | null = null
 
   try {
-    matches = await getMatches()
+    matches = (await fetchMatches(20, leagueId ?? undefined)) as Match[]
   } catch (err) {
     error = err instanceof Error ? err.message : t('common.error')
   }

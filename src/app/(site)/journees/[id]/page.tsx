@@ -5,6 +5,7 @@ import RankingTable from '@/components/RankingTable'
 import { buildRanking } from '@/lib/rankings'
 import { CritereDefinition, Journee, Match, Vote } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
+import { getLocalizedName } from '@/lib/utils'
 import {
   fetchCritereDefinitions,
   fetchJourneeWithSeason,
@@ -33,7 +34,7 @@ export default async function JourneePage({
   }
 
   const locale = await getServerLocale()
-  const t = (key: string) => translate(key, locale)
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
   const matches = await getMatches(id)
   const matchIds = matches.map((m) => m.id)
 
@@ -88,9 +89,12 @@ export default async function JourneePage({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-700 mb-1">{t('journee.bestReferee')}</p>
           <p className="text-2xl font-bold text-blue-900">
-            {locale === 'ar' && refereeRanking[0].nom_ar
-              ? refereeRanking[0].nom_ar
-              : refereeRanking[0].nom}
+            {getLocalizedName(locale, {
+              defaultValue: refereeRanking[0].nom,
+              fr: refereeRanking[0].nom,
+              en: refereeRanking[0].nom_en ?? undefined,
+              ar: refereeRanking[0].nom_ar ?? undefined,
+            })}
           </p>
           <p className="text-sm text-blue-700">
             {t('common.globalNote')}: {refereeRanking[0].moyenne.toFixed(2)} / 5

@@ -3,6 +3,7 @@ import { CritereCategory, CritereDefinition, Vote } from '@/types'
 export interface RankingEntry {
   arbitreId: string
   nom: string
+  nom_en?: string | null
   nom_ar?: string | null
   photo_url?: string | null
   moyenne: number
@@ -31,6 +32,7 @@ export function buildRanking(
     string,
     {
       nom: string
+      nom_en?: string | null
       nom_ar?: string | null
       photo_url?: string | null
       total: number
@@ -43,11 +45,22 @@ export function buildRanking(
     if (!vote.arbitre) return
     const current = map.get(vote.arbitre.id) ?? {
       nom: vote.arbitre.nom,
+      nom_en: vote.arbitre.nom_en,
       nom_ar: vote.arbitre.nom_ar,
       photo_url: vote.arbitre.photo_url,
       total: 0,
       count: 0,
       criteres: {},
+    }
+
+    if (!current.nom_en && vote.arbitre.nom_en) {
+      current.nom_en = vote.arbitre.nom_en
+    }
+    if (!current.nom_ar && vote.arbitre.nom_ar) {
+      current.nom_ar = vote.arbitre.nom_ar
+    }
+    if (!current.photo_url && vote.arbitre.photo_url) {
+      current.photo_url = vote.arbitre.photo_url
     }
 
     current.total += Number(vote.note_globale)
@@ -102,6 +115,7 @@ export function buildRanking(
       return {
         arbitreId,
         nom: value.nom,
+      nom_en: value.nom_en,
         nom_ar: value.nom_ar,
         photo_url: value.photo_url,
         moyenne: Math.round((value.total / value.count) * 100) / 100,

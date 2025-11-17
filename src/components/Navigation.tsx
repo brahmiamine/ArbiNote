@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useTranslations } from "@/lib/i18n";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
+import FederationSwitcher from "./FederationSwitcher";
 
 export default function Navigation() {
   const { t } = useTranslations();
@@ -14,7 +15,7 @@ export default function Navigation() {
           <Link href="/" className="text-xl font-bold hover:text-blue-200">
             ArbiNote ⚽
           </Link>
-          <div className="flex flex-1 justify-center md:justify-end gap-6 text-sm md:text-base">
+          <div className="flex flex-1 justify-center md:justify-center gap-6 text-sm md:text-base">
             <Link href="/saisons" className="hover:text-blue-200 transition-colors">
               {t("nav.seasons")}
             </Link>
@@ -29,6 +30,7 @@ export default function Navigation() {
             </Link>
           </div>
           <div className="flex items-center gap-3">
+            <FederationSwitcher variant="light" />
             <ThemeToggle />
             <LanguageSwitcher />
           </div>

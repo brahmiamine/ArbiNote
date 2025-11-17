@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import RankingTable from '@/components/RankingTable'
 import { buildRanking } from '@/lib/rankings'
-import { formatDate } from '@/lib/utils'
+import { formatDate, getLocalizedName } from '@/lib/utils'
 import { CritereDefinition, Journee, Saison, Vote } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
 import {
@@ -34,7 +34,7 @@ export default async function SaisonDetailPage({
   }
 
   const locale = await getServerLocale()
-  const t = (key: string) => translate(key, locale)
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
   const journees = await getJournees(saison.id)
   const journeeIds = journees.map((j) => j.id)
 
@@ -109,9 +109,12 @@ export default async function SaisonDetailPage({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-700 mb-1">{t('saisonDetail.bestReferee')}</p>
           <p className="text-2xl font-bold text-blue-900">
-            {locale === 'ar' && refereeRanking[0].nom_ar
-              ? refereeRanking[0].nom_ar
-              : refereeRanking[0].nom}
+            {getLocalizedName(locale, {
+              defaultValue: refereeRanking[0].nom,
+              fr: refereeRanking[0].nom,
+              en: refereeRanking[0].nom_en ?? undefined,
+              ar: refereeRanking[0].nom_ar ?? undefined,
+            })}
           </p>
           <p className="text-sm text-blue-700">
             {t('common.globalNote')}: {refereeRanking[0].moyenne.toFixed(2)} / 5

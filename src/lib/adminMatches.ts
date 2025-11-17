@@ -25,22 +25,27 @@ function normalizeScore(value: unknown) {
   return Number.isFinite(num) ? num : null
 }
 
-export async function listMatchesForAdmin(limit = 50) {
+export async function listMatchesForAdmin(limit = 50, leagueId?: string | null) {
   const dataSource = await getDataSource()
   const repo = dataSource.getRepository<Match>('matches')
-  const rows = await repo.find({
-    relations: {
-      equipe_home: true,
-      equipe_away: true,
-      journee: true,
-    },
-    order: { date: 'DESC' },
-    take: limit,
-  })
+  const qb = repo
+    .createQueryBuilder('match')
+    .leftJoinAndSelect('match.journee', 'journee')
+    .leftJoinAndSelect('journee.saison', 'saison')
+    .leftJoinAndSelect('match.equipe_home', 'equipe_home')
+    .leftJoinAndSelect('match.equipe_away', 'equipe_away')
+    .orderBy('match.date', 'DESC')
+    .take(limit)
+
+  if (leagueId) {
+    qb.where('saison.league_id = :leagueId', { leagueId })
+  }
+
+  const rows = await qb.getMany()
   return toPlainArray(rows)
 }
 
-export async function updateMatchAdmin(id: string, payload: MatchUpdateInput) {
+export async function updateMatchAdmin(id: string, payload: MatchUpdateInput, leagueId?: string | null) {
   const dataSource = await getDataSource()
   const repo = dataSource.getRepository<Match>('matches')
   const match = await repo.findOne({
@@ -48,12 +53,16 @@ export async function updateMatchAdmin(id: string, payload: MatchUpdateInput) {
     relations: {
       equipe_home: true,
       equipe_away: true,
-      journee: true,
+      journee: { saison: true },
     },
   })
 
   if (!match) {
     throw new Error('Match introuvable')
+  }
+
+  if (leagueId && match.journee?.saison?.league_id && match.journee.saison.league_id !== leagueId) {
+    throw new Error('Ce match n’appartient pas à la ligue sélectionnée')
   }
 
   if (payload.score_home !== undefined) {

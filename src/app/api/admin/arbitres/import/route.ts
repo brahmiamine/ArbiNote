@@ -32,6 +32,7 @@ function parseCsv(content: string): ArbitreImportInput[] {
     rows.push({
       id: record.id || undefined,
       nom: record.nom,
+      nom_en: record.nom_en || undefined,
       nom_ar: record.nom_ar || undefined,
       date_naissance: record.date_naissance || undefined,
       photo_url: record.photo_url || undefined,

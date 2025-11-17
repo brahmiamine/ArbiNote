@@ -7,6 +7,7 @@ type FormState = {
   id: string
   categorie: CritereDefinition['categorie']
   label_fr: string
+  label_en: string
   label_ar: string
   description_fr: string
   description_ar: string
@@ -16,6 +17,7 @@ const defaultForm: FormState = {
   id: '',
   categorie: 'arbitre',
   label_fr: '',
+  label_en: '',
   label_ar: '',
   description_fr: '',
   description_ar: '',
@@ -81,6 +83,7 @@ export default function CritereManager() {
       id: critere.id,
       categorie: critere.categorie,
       label_fr: critere.label_fr,
+      label_en: critere.label_en ?? '',
       label_ar: critere.label_ar,
       description_fr: critere.description_fr ?? '',
       description_ar: critere.description_ar ?? '',
@@ -95,6 +98,7 @@ export default function CritereManager() {
         id: form.id.trim(),
         categorie: form.categorie,
         label_fr: form.label_fr.trim(),
+        label_en: form.label_en.trim() || null,
         label_ar: form.label_ar.trim(),
         description_fr: form.description_fr.trim() || null,
         description_ar: form.description_ar.trim() || null,
@@ -215,6 +219,15 @@ export default function CritereManager() {
             />
           </div>
           <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Label EN</label>
+            <input
+              type="text"
+              value={form.label_en}
+              onChange={(e) => setForm((prev) => ({ ...prev, label_en: e.target.value }))}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+          <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Label AR</label>
             <input
               type="text"
@@ -281,6 +294,7 @@ export default function CritereManager() {
                   <th className="p-2">ID</th>
                   <th className="p-2">Catégorie</th>
                   <th className="p-2">Label FR</th>
+                  <th className="p-2">Label EN</th>
                   <th className="p-2">Label AR</th>
                   <th className="p-2">Actions</th>
                 </tr>
@@ -291,6 +305,7 @@ export default function CritereManager() {
                     <td className="p-2 font-mono text-xs">{critere.id}</td>
                     <td className="p-2">{categorieLabels[critere.categorie]}</td>
                     <td className="p-2">{critere.label_fr}</td>
+                    <td className="p-2">{critere.label_en || '—'}</td>
                     <td className="p-2">{critere.label_ar}</td>
                     <td className="p-2 flex gap-2">
                       <button

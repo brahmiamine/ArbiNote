@@ -3,6 +3,7 @@ import RankingTable from '@/components/RankingTable'
 import { buildRanking } from '@/lib/rankings'
 import { CritereDefinition, Vote } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
+import { getLocalizedName } from '@/lib/utils'
 import {
   fetchCritereDefinitions,
   fetchJourneesBySaison,
@@ -10,15 +11,17 @@ import {
   fetchMatchesByJourneeIds,
   fetchVotesByMatchIds,
 } from '@/lib/dataAccess'
+import { getActiveLeagueId } from '@/lib/leagueSelection'
 
-async function getLatestSaison() {
-  return fetchLatestSaison()
+async function getLatestSaison(leagueId?: string | null) {
+  return fetchLatestSaison(leagueId)
 }
 
 export default async function ClassementPage() {
   const locale = await getServerLocale()
-  const t = (key: string) => translate(key, locale)
-  const saison = await getLatestSaison()
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
+  const leagueId = await getActiveLeagueId()
+  const saison = await getLatestSaison(leagueId ?? undefined)
 
   if (!saison) {
     return (
@@ -97,9 +100,12 @@ export default async function ClassementPage() {
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800 mb-1">{t('classement.bestRefereeOverall')}</p>
           <p className="text-2xl font-bold text-blue-900">
-            {locale === 'ar' && refereeRanking[0].nom_ar
-              ? refereeRanking[0].nom_ar
-              : refereeRanking[0].nom}
+            {getLocalizedName(locale, {
+              defaultValue: refereeRanking[0].nom,
+              fr: refereeRanking[0].nom,
+              en: refereeRanking[0].nom_en ?? undefined,
+              ar: refereeRanking[0].nom_ar ?? undefined,
+            })}
           </p>
           <p className="text-sm text-blue-700">
             {t('common.globalNote')}: {refereeRanking[0].moyenne.toFixed(2)} / 5
@@ -135,9 +141,12 @@ export default async function ClassementPage() {
           <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
             <p className="text-sm text-emerald-800 mb-1">{t('classement.bestArbitrageOverall')}</p>
             <p className="text-2xl font-bold text-emerald-900">
-              {locale === 'ar' && generalRanking[0].nom_ar
-                ? generalRanking[0].nom_ar
-                : generalRanking[0].nom}
+              {getLocalizedName(locale, {
+                defaultValue: generalRanking[0].nom,
+                fr: generalRanking[0].nom,
+                en: generalRanking[0].nom_en ?? undefined,
+                ar: generalRanking[0].nom_ar ?? undefined,
+              })}
             </p>
             <p className="text-sm text-emerald-700">
               {t('common.globalNote')}: {generalRanking[0].moyenne.toFixed(2)} / 5
@@ -164,9 +173,12 @@ export default async function ClassementPage() {
                 </p>
                 <p className="text-lg font-semibold">
                   {best
-                    ? locale === 'ar' && best.nom_ar
-                      ? best.nom_ar
-                      : best.nom
+                    ? getLocalizedName(locale, {
+                        defaultValue: best.nom,
+                        fr: best.nom,
+                        en: best.nom_en ?? undefined,
+                        ar: best.nom_ar ?? undefined,
+                      })
                     : t('journee.noVotes')}
                 </p>
               </div>

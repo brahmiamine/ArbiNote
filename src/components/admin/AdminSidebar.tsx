@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import FederationSwitcher from '../FederationSwitcher'
 
 const navItems = [
   { label: 'Tableau de bord', href: '/admin' },
@@ -37,7 +38,11 @@ export default function AdminSidebar() {
           )
         })}
       </nav>
-      <div className="p-4 text-xs text-slate-500 border-t border-slate-800">ArbiNote © {new Date().getFullYear()}</div>
+      <div className="p-4 border-t border-slate-800 space-y-3">
+        <p className="text-xs uppercase tracking-wide text-slate-500">Ligues</p>
+        <FederationSwitcher variant="dark" />
+        <p className="text-xs text-slate-500">ArbiNote © {new Date().getFullYear()}</p>
+      </div>
     </aside>
   )
 }

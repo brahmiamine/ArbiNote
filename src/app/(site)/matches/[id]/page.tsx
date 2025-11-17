@@ -30,15 +30,46 @@ export default async function MatchDetailPage({
   }
 
   const locale = await getServerLocale()
-  const t = (key: string) => translate(key, locale)
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
   const arbitre = match.arbitre || null
   const journeeLabel = match.journee?.numero
   const saisonLabel = match.journee?.saison?.nom
+  const homeName = getLocalizedName(locale, {
+    defaultValue: match.equipe_home.nom,
+    fr: match.equipe_home.nom,
+    en: match.equipe_home.nom_en ?? undefined,
+    ar: match.equipe_home.nom_ar ?? undefined,
+  })
+  const awayName = getLocalizedName(locale, {
+    defaultValue: match.equipe_away.nom,
+    fr: match.equipe_away.nom,
+    en: match.equipe_away.nom_en ?? undefined,
+    ar: match.equipe_away.nom_ar ?? undefined,
+  })
+  const homeCity =
+    match.equipe_home.city || match.equipe_home.city_en || match.equipe_home.city_ar
+      ? getLocalizedName(locale, {
+          defaultValue: match.equipe_home.city ?? match.equipe_home.city_en ?? match.equipe_home.city_ar ?? '',
+          fr: match.equipe_home.city ?? undefined,
+          en: match.equipe_home.city_en ?? undefined,
+          ar: match.equipe_home.city_ar ?? undefined,
+        })
+      : null
+  const awayCity =
+    match.equipe_away.city || match.equipe_away.city_en || match.equipe_away.city_ar
+      ? getLocalizedName(locale, {
+          defaultValue: match.equipe_away.city ?? match.equipe_away.city_en ?? match.equipe_away.city_ar ?? '',
+          fr: match.equipe_away.city ?? undefined,
+          en: match.equipe_away.city_en ?? undefined,
+          ar: match.equipe_away.city_ar ?? undefined,
+        })
+      : null
   const refereeName =
     arbitre && typeof arbitre === 'object'
       ? getLocalizedName(locale, {
           defaultValue: arbitre.nom,
           fr: arbitre.nom,
+          en: arbitre.nom_en ?? undefined,
           ar: arbitre.nom_ar ?? undefined,
         })
       : null
@@ -68,7 +99,7 @@ export default async function MatchDetailPage({
             {match.equipe_home.logo_url && (
               <Image
                 src={match.equipe_home.logo_url}
-                alt={`Logo ${match.equipe_home.nom}`}
+                alt={`Logo ${homeName}`}
                 width={64}
                 height={64}
                 className="object-contain"
@@ -77,11 +108,11 @@ export default async function MatchDetailPage({
             <div>
               <p className="text-sm text-gray-500">{t('common.homeTeam')}</p>
               <p className="text-2xl font-bold">
-                {(match.equipe_home.abbr || match.equipe_home.nom).toUpperCase()}
+                {(match.equipe_home.abbr || homeName).toUpperCase()}
               </p>
               <p className="text-sm text-gray-600">
-                {match.equipe_home.nom}
-                {match.equipe_home.city && ` (${match.equipe_home.city})`}
+                {homeName}
+                {homeCity && ` (${homeCity})`}
               </p>
             </div>
           </div>
@@ -90,17 +121,17 @@ export default async function MatchDetailPage({
             <div>
               <p className="text-sm text-gray-500">{t('common.awayTeam')}</p>
               <p className="text-2xl font-bold">
-                {(match.equipe_away.abbr || match.equipe_away.nom).toUpperCase()}
+                {(match.equipe_away.abbr || awayName).toUpperCase()}
               </p>
               <p className="text-sm text-gray-600">
-                {match.equipe_away.nom}
-                {match.equipe_away.city && ` (${match.equipe_away.city})`}
+                {awayName}
+                {awayCity && ` (${awayCity})`}
               </p>
             </div>
             {match.equipe_away.logo_url && (
               <Image
                 src={match.equipe_away.logo_url}
-                alt={`Logo ${match.equipe_away.nom}`}
+                alt={`Logo ${awayName}`}
                 width={64}
                 height={64}
                 className="object-contain"

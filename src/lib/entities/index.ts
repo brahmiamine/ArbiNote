@@ -1,4 +1,6 @@
 export { Arbitre } from './Arbitre'
+export { Federation } from './Federation'
+export { League } from './League'
 export { Saison } from './Saison'
 export { Journee } from './Journee'
 export { Team } from './Team'

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ensureAdminAuth } from '@/lib/adminAuth'
 import { updateMatchAdmin } from '@/lib/adminMatches'
+import { getActiveLeagueId } from '@/lib/leagueSelection'
 
 export const runtime = 'nodejs'
 
@@ -13,7 +14,11 @@ export async function PATCH(
 
   try {
     const body = await request.json()
-    const match = await updateMatchAdmin(params.id, body)
+    const leagueId = await getActiveLeagueId()
+    if (!leagueId) {
+      return NextResponse.json({ error: 'Aucune ligue active' }, { status: 400 })
+    }
+    const match = await updateMatchAdmin(params.id, body, leagueId)
     return NextResponse.json(match)
   } catch (error) {
     console.error('Error updating match:', error)

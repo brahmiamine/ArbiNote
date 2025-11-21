@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import Navigation from '@/components/Navigation'
+import Footer from '@/components/Footer'
 import { FederationProvider } from '@/components/FederationContext'
 import { fetchFederationsWithLeagues } from '@/lib/dataAccess'
 import { getActiveLeagueId } from '@/lib/leagueSelection'
@@ -24,6 +25,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     <FederationProvider federations={federations} initialLeagueId={activeLeagueId}>
       <Navigation />
       <main className="container mx-auto px-4 py-8">{children}</main>
+      <Footer />
     </FederationProvider>
   )
 }

@@ -41,6 +41,13 @@ export default function AdminMatchesManager() {
   const [savingId, setSavingId] = useState<string | null>(null)
   const [selectedJourneeId, setSelectedJourneeId] = useState<string>('')
 
+  const sortedJournees = useMemo(() => {
+    return [...journees].sort((a, b) => {
+      // Trier par numéro de journée en ordre croissant (1, 2, 3...)
+      return a.numero - b.numero
+    })
+  }, [journees])
+
   const sortedMatches = useMemo(() => {
     return [...matches].sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0
@@ -55,7 +62,20 @@ export default function AdminMatchesManager() {
   }, [])
 
   useEffect(() => {
-    loadMatches()
+    // Sélectionner automatiquement la première journée (journée 1) si disponible
+    if (journees.length > 0 && !selectedJourneeId) {
+      const sorted = [...journees].sort((a, b) => a.numero - b.numero)
+      const firstJournee = sorted[0]
+      if (firstJournee) {
+        setSelectedJourneeId(firstJournee.id)
+      }
+    }
+  }, [journees, selectedJourneeId])
+
+  useEffect(() => {
+    if (selectedJourneeId) {
+      loadMatches()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedJourneeId])
 
@@ -90,11 +110,15 @@ export default function AdminMatchesManager() {
   }
 
   async function loadMatches() {
+    if (!selectedJourneeId) {
+      setMatches([])
+      setEdits({})
+      return
+    }
+    
     try {
       setLoading(true)
-      const url = selectedJourneeId
-        ? `/api/admin/matches?limit=100&journeeId=${selectedJourneeId}`
-        : '/api/admin/matches?limit=100'
+      const url = `/api/admin/matches?limit=100&journeeId=${selectedJourneeId}`
       const response = await fetch(url, {
         cache: 'no-store',
         credentials: 'include',
@@ -224,8 +248,7 @@ export default function AdminMatchesManager() {
             onChange={(e) => setSelectedJourneeId(e.target.value)}
             className="border rounded px-3 py-2 text-sm min-w-[200px]"
           >
-            <option value="">Toutes les journées</option>
-            {journees.map((journee) => (
+            {sortedJournees.map((journee) => (
               <option key={journee.id} value={journee.id}>
                 Journée {journee.numero}
                 {journee.date_journee

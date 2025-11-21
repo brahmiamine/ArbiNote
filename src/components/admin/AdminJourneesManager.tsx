@@ -32,12 +32,8 @@ export default function AdminJourneesManager() {
 
   const sortedJournees = useMemo(() => {
     return [...journees].sort((a, b) => {
-      const dateA = a.date_journee ? new Date(a.date_journee).getTime() : 0
-      const dateB = b.date_journee ? new Date(b.date_journee).getTime() : 0
-      if (dateB !== dateA) {
-        return dateB - dateA
-      }
-      return b.numero - a.numero
+      // Trier par numéro de journée en ordre croissant (1, 2, 3...)
+      return a.numero - b.numero
     })
   }, [journees])
 

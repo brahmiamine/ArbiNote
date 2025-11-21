@@ -69,6 +69,13 @@ export interface Journee {
   numero: number
   saison_id: string
   date_journee?: string | null
+  saison?: {
+    id: string
+    nom: string
+    date_debut?: string | null
+    date_fin?: string | null
+    league_id?: string | null
+  }
 }
 
 export interface Match {

@@ -1,7 +1,7 @@
 import MatchCard from '@/components/MatchCard'
 import { Match } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
-import { fetchMatches } from '@/lib/dataAccess'
+import { fetchNextJourneeMatches } from '@/lib/dataAccess'
 import { getActiveLeagueId } from '@/lib/leagueSelection'
 
 export default async function MatchesPage() {
@@ -12,7 +12,8 @@ export default async function MatchesPage() {
   let error: string | null = null
 
   try {
-    matches = (await fetchMatches(20, leagueId ?? undefined)) as Match[]
+    const result = await fetchNextJourneeMatches(new Date(), leagueId ?? undefined)
+    matches = result ? (result.matches as Match[]) : []
   } catch (err) {
     error = err instanceof Error ? err.message : t('common.error')
   }

@@ -35,18 +35,44 @@ export default function AdminDashboard() {
   const [importing, setImporting] = useState(false)
   const [uploadingCreate, setUploadingCreate] = useState(false)
   const [uploadingEdit, setUploadingEdit] = useState(false)
+  const [viewingPhoto, setViewingPhoto] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     loadArbitres()
   }, [])
 
-  const sortedArbitres = useMemo(
-    () =>
-      [...arbitres].sort((a, b) =>
-        a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' })
-      ),
-    [arbitres]
-  )
+  useEffect(() => {
+    if (viewingPhoto) {
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setViewingPhoto(null)
+        }
+      }
+      document.addEventListener('keydown', handleEscape)
+      return () => {
+        document.removeEventListener('keydown', handleEscape)
+      }
+    }
+  }, [viewingPhoto])
+
+  const filteredAndSortedArbitres = useMemo(() => {
+    let filtered = arbitres
+
+    // Filtrer par recherche
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = arbitres.filter(
+        (arbitre) =>
+          arbitre.nom.toLowerCase().includes(query) ||
+          arbitre.nom_en?.toLowerCase().includes(query) ||
+          arbitre.nom_ar?.toLowerCase().includes(query)
+      )
+    }
+
+    // Trier par nom
+    return filtered.sort((a, b) => a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' }))
+  }, [arbitres, searchQuery])
 
   async function loadArbitres() {
     try {
@@ -159,7 +185,17 @@ export default function AdminDashboard() {
     if (!editingId) return
     setError(null)
     try {
-      const photoUrl = await uploadPhoto(editForm.photoFile, 'edit')
+      let photoUrl = editForm.photo_url || null
+      
+      // Si une nouvelle photo est sélectionnée, l'uploader
+      if (editForm.photoFile) {
+        photoUrl = await uploadPhoto(editForm.photoFile, 'edit')
+      }
+      // Si photo_url est vide (photo supprimée), envoyer null
+      else if (editForm.photo_url === '') {
+        photoUrl = null
+      }
+      
       const response = await fetch(`/api/admin/arbitres/${editingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -169,7 +205,7 @@ export default function AdminDashboard() {
           nom_en: editForm.nom_en || null,
           nom_ar: editForm.nom_ar || null,
           date_naissance: editForm.date_naissance || null,
-          photo_url: photoUrl || editForm.photo_url || null,
+          photo_url: photoUrl,
         }),
       })
       if (!response.ok) {
@@ -331,7 +367,16 @@ export default function AdminDashboard() {
 
       <section className="bg-white shadow rounded-lg p-5" id="arbitres">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold">Arbitres ({sortedArbitres.length})</h3>
+          <h3 className="text-xl font-semibold">Arbitres ({filteredAndSortedArbitres.length})</h3>
+        </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Rechercher par nom..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
         {loading ? (
           <p>Chargement...</p>
@@ -349,40 +394,94 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {sortedArbitres.map((arbitre) => (
-                  <tr key={arbitre.id} className="border-b last:border-0">
-                    <td className="p-2 font-medium">{arbitre.nom}</td>
-                    <td className="p-2">{arbitre.nom_en || '—'}</td>
-                    <td className="p-2">{arbitre.nom_ar || '—'}</td>
-                    <td className="p-2">
+                {filteredAndSortedArbitres.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-gray-500">
+                      {searchQuery.trim() ? 'Aucun arbitre trouvé pour cette recherche' : 'Aucun arbitre'}
+                    </td>
+                  </tr>
+                ) : (
+                  filteredAndSortedArbitres.map((arbitre) => (
+                  <tr
+                    key={arbitre.id}
+                    className={`border-b last:border-0 transition-colors ${
+                      editingId === arbitre.id
+                        ? 'bg-blue-50 border-blue-200'
+                        : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <td className="p-3 font-medium">{arbitre.nom}</td>
+                    <td className="p-3">{arbitre.nom_en || '—'}</td>
+                    <td className="p-3">{arbitre.nom_ar || '—'}</td>
+                    <td className="p-3">
                       {arbitre.date_naissance
                         ? new Date(arbitre.date_naissance).toLocaleDateString('fr-FR')
                         : '—'}
                     </td>
-                    <td className="p-2">
+                    <td className="p-3">
                       {arbitre.photo_url ? (
-                        <a
-                          href={arbitre.photo_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 underline"
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setViewingPhoto(arbitre.photo_url || null)
+                          }}
+                          className="flex-shrink-0 group cursor-pointer"
                         >
-                          Voir
-                        </a>
+                          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-300 group-hover:border-blue-500 transition-all shadow-md group-hover:shadow-lg group-hover:scale-105">
+                            <img
+                              src={arbitre.photo_url}
+                              alt={arbitre.nom}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                const parent = target.parentElement
+                                if (parent) {
+                                  parent.innerHTML = `
+                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                      <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                      </svg>
+                                    </div>
+                                  `
+                                }
+                              }}
+                            />
+                          </div>
+                        </button>
                       ) : (
-                        '—'
+                        <div className="w-16 h-16 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center flex-shrink-0">
+                          <svg
+                            className="w-8 h-8 text-gray-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                        </div>
                       )}
                     </td>
-                    <td className="p-2 text-right">
+                    <td className="p-3 text-right">
                       <button
                         onClick={() => startEdit(arbitre)}
-                        className="px-3 py-1 border rounded hover:bg-gray-50 text-xs"
+                        className={`px-4 py-1.5 rounded text-xs font-medium transition-colors ${
+                          editingId === arbitre.id
+                            ? 'bg-blue-700 text-white'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
                       >
-                        Modifier
+                        {editingId === arbitre.id ? 'En cours...' : 'Modifier'}
                       </button>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -390,14 +489,17 @@ export default function AdminDashboard() {
       </section>
 
       {editingId && (
-        <section className="bg-white shadow rounded-lg p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold">Modifier l’arbitre</h3>
-            <button onClick={cancelEdit} className="text-sm text-gray-500 hover:underline">
-              Annuler
+        <section className="bg-white shadow-lg rounded-lg p-6 border-2 border-blue-200">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-blue-700">Modifier l'arbitre</h3>
+            <button
+              onClick={cancelEdit}
+              className="text-sm text-gray-500 hover:text-gray-700 hover:underline"
+            >
+              ✕ Fermer
             </button>
           </div>
-          <form className="grid md:grid-cols-2 gap-4" onSubmit={handleUpdate}>
+          <form className="grid md:grid-cols-2 gap-6" onSubmit={handleUpdate}>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Nom (français)</label>
@@ -441,17 +543,56 @@ export default function AdminDashboard() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Photo</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(setEditForm)(e.target.files)}
-                  className="w-full"
-                />
-                {uploadingEdit && <p className="text-xs text-gray-500 mt-1">Envoi en cours...</p>}
-                {editForm.photo_url && (
-                  <p className="text-xs text-gray-500 mt-1 truncate">{editForm.photo_url}</p>
+                <label className="block text-sm font-medium mb-2">Photo</label>
+                {editForm.photo_url ? (
+                  <div className="mb-3 p-3 bg-gray-50 rounded border">
+                    <div className="flex items-start gap-4 mb-3">
+                      <img
+                        src={editForm.photo_url}
+                        alt="Photo actuelle"
+                        className="w-24 h-24 object-cover rounded border-2 border-gray-300"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                        }}
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Photo actuelle</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditForm((prev) => ({ ...prev, photo_url: '', photoFile: null }))
+                          }}
+                          className="px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-medium transition-colors"
+                        >
+                          ✕ Supprimer la photo
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-3 p-3 bg-gray-50 rounded border border-dashed">
+                    <p className="text-sm text-gray-500">Aucune photo</p>
+                  </div>
                 )}
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(setEditForm)(e.target.files)}
+                    className="w-full text-sm"
+                  />
+                  {uploadingEdit && (
+                    <p className="text-xs text-blue-600 mt-1">⏳ Envoi en cours...</p>
+                  )}
+                  {editForm.photoFile && (
+                    <div className="p-2 bg-green-50 border border-green-200 rounded">
+                      <p className="text-xs text-green-700 font-medium">
+                        ✓ Nouvelle photo sélectionnée: {editForm.photoFile.name}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="md:col-span-2 flex gap-3">
@@ -472,6 +613,43 @@ export default function AdminDashboard() {
             </div>
           </form>
         </section>
+      )}
+
+      {/* Modal pour afficher la photo */}
+      {viewingPhoto && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+          onClick={() => setViewingPhoto(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center">
+            <img
+              src={viewingPhoto}
+              alt="Photo arbitre"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              type="button"
+              onClick={() => setViewingPhoto(null)}
+              className="absolute top-4 right-4 bg-white text-gray-800 rounded-full p-2 hover:bg-gray-100 transition-colors shadow-lg"
+              aria-label="Fermer"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

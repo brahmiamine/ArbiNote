@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { formatDateShort, getLocalizedName } from '@/lib/utils'
 import { Match } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
+import VotedBadge from './VotedBadge'
+import ArbitreLink from './ArbitreLink'
 
 interface MatchCardProps {
   match: Match
@@ -66,91 +68,130 @@ export default async function MatchCard({ match }: MatchCardProps) {
         })
       : null
 
+  const hasScore = typeof match.score_home === 'number' && typeof match.score_away === 'number'
+
   return (
     <Link
       href={`/matches/${match.id}`}
-      className="block p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200"
+      className="block bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-4 mb-1">
-            <div className="flex items-center gap-2">
-              {match.equipe_home.logo_url && (
+      <div className="p-6">
+        {/* Header avec date et journée */}
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>{dateLabel}</span>
+            </div>
+            {journeeLabel && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>{t('matchCard.matchday')} {journeeLabel}</span>
+              </div>
+            )}
+            <VotedBadge matchId={match.id} />
+          </div>
+          <div className="text-blue-600 group-hover:text-blue-700 transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Équipes et score */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Équipe domicile */}
+          <div className="flex-1 flex items-center gap-4">
+            {match.equipe_home.logo_url ? (
+              <div className="relative w-16 h-16 flex-shrink-0">
                 <Image
                   src={match.equipe_home.logo_url}
                   alt={`Logo ${homeName}`}
-                  width={36}
-                  height={36}
+                  fill
+                  sizes="64px"
                   className="object-contain"
                 />
-              )}
-              <div>
-                <span className="font-bold text-lg">{homeLabel}</span>
-                {homeCity && <span className="block text-xs text-gray-500">{homeCity}</span>}
               </div>
+            ) : (
+              <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center">
+                <span className="text-gray-400 font-bold text-lg">
+                  {homeLabel.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div className="flex-1">
+              <div className="font-bold text-xl text-gray-900">{homeName}</div>
+              {homeCity && <div className="text-xs text-gray-500 mt-1">{homeCity}</div>}
             </div>
-            <span className="text-gray-500">vs</span>
-            <div className="flex items-center gap-2">
-              <div className="text-right">
-                <span className="font-bold text-lg">{awayLabel}</span>
-                {awayCity && <span className="block text-xs text-gray-500">{awayCity}</span>}
+          </div>
+
+          {/* Score */}
+          <div className="mx-6 flex-shrink-0">
+            {hasScore ? (
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {match.score_home} - {match.score_away}
+                </div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">{t('matchCard.score')}</div>
               </div>
-              {match.equipe_away.logo_url && (
+            ) : (
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-400 mb-1">VS</div>
+                <div className="text-xs text-gray-400">{t('common.datePending')}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Équipe extérieure */}
+          <div className="flex-1 flex items-center gap-4 justify-end text-right">
+            <div className="flex-1">
+              <div className="font-bold text-xl text-gray-900">{awayName}</div>
+              {awayCity && <div className="text-xs text-gray-500 mt-1">{awayCity}</div>}
+            </div>
+            {match.equipe_away.logo_url ? (
+              <div className="relative w-16 h-16 flex-shrink-0">
                 <Image
                   src={match.equipe_away.logo_url}
                   alt={`Logo ${awayName}`}
-                  width={36}
-                  height={36}
+                  fill
+                  sizes="64px"
                   className="object-contain"
                 />
-              )}
-            </div>
-          </div>
-          <div className="text-sm text-gray-600 space-y-1">
-            <div>
-              📅 {t('matchCard.date')}: {dateLabel}
-            </div>
-            {typeof match.score_home === 'number' &&
-              typeof match.score_away === 'number' && (
-                <div>
-                  🔢 {t('matchCard.score')}: {match.score_home} - {match.score_away}
-                </div>
-              )}
-            {match.equipe_home.stadium && (
-              <div>
-                🏟️ {t('matchCard.stadium')}: {match.equipe_home.stadium}
               </div>
-            )}
-            {journeeLabel && (
-              <div>
-                {t('matchCard.matchday')} {journeeLabel}
-              </div>
-            )}
-            {match.arbitre && refereeName && (
-              <div className="flex items-center gap-2">
-                {match.arbitre.photo_url && (
-                  <span className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-                    <Image
-                      src={match.arbitre.photo_url}
-                      alt={`Photo ${refereeName}`}
-                      fill
-                      sizes="32px"
-                      className="object-cover"
-                    />
-                  </span>
-                )}
-                <div className="flex flex-col text-sm">
-                  <span>👤 {t('matchCard.referee')}: {refereeName}</span>
-                  {refereeCategory && (
-                    <span className="text-xs text-gray-500">{refereeCategory}</span>
-                  )}
-                </div>
+            ) : (
+              <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center">
+                <span className="text-gray-400 font-bold text-lg">
+                  {awayLabel.charAt(0).toUpperCase()}
+                </span>
               </div>
             )}
           </div>
         </div>
-        <div className="text-blue-600 ml-4">
-          →
+
+        {/* Footer avec stade et arbitre */}
+        <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-4">
+          <div className="flex-1 flex items-center gap-4 text-sm text-gray-600">
+            {match.equipe_home.stadium && (
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <span className="truncate">{match.equipe_home.stadium}</span>
+              </div>
+            )}
+          </div>
+          {match.arbitre && refereeName && (
+            <ArbitreLink
+              arbitreId={match.arbitre.id}
+              photoUrl={match.arbitre.photo_url || null}
+              name={refereeName}
+              category={refereeCategory || null}
+            />
+          )}
         </div>
       </div>
     </Link>

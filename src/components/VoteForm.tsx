@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import StarsRating from "./StarsRating";
 import { hasVoted, markAsVoted } from "@/lib/voteProtection";
-import { roundNote } from "@/lib/utils";
+import { roundNote, canVoteMatch } from "@/lib/utils";
 import { useTranslations } from "@/lib/i18n";
 import { CritereDefinition } from "@/types";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
@@ -48,14 +48,19 @@ interface VoteFormProps {
   arbitreId: string;
   arbitreNom: string;
   criteresDefs: CritereDefinition[];
+  matchDate?: string | null;
   onSuccess?: () => void;
 }
 
 type CriteresState = Record<string, number>;
 
-export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs, onSuccess }: VoteFormProps) {
+export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs, matchDate, onSuccess }: VoteFormProps) {
   const { t, locale } = useTranslations();
   const criteresList = criteresDefs.length ? criteresDefs : fallbackCriteres;
+  
+  const canVote = useMemo(() => {
+    return canVoteMatch({ arbitre_id: arbitreId, date: matchDate });
+  }, [arbitreId, matchDate]);
 
   const emptyState = useMemo(() => {
     return criteresList.reduce<CriteresState>((acc, critere) => {
@@ -114,6 +119,11 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!canVote) {
+      setError(t("voteForm.errorCannotVote"));
+      return;
+    }
 
     const allFilled = criteresList.every((critere) => criteres[critere.id] > 0);
     if (!allFilled) {
@@ -174,7 +184,23 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
   if (alreadyVoted || success) {
     return (
       <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
-        <p className="text-green-800 font-medium">{success ? t("voteForm.success") : t("voteForm.alreadyVoted")}</p>
+        <div className="flex items-start gap-3">
+          <svg className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <div className="flex-1">
+            <p className="text-green-800 font-medium mb-2">
+              {success ? t("voteForm.success") : t("voteForm.alreadyVoted")}
+            </p>
+            <p className="text-sm text-green-700">
+              {t("voteForm.cannotChange")}
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -251,7 +277,7 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
 
       <button
         type="submit"
-        disabled={isSubmitting || noteGlobale === 0}
+        disabled={isSubmitting || noteGlobale === 0 || !canVote}
         className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
       >
         {isSubmitting ? t("voteForm.submitting") : t("voteForm.submit")}

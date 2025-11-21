@@ -1,11 +1,12 @@
 import { getDataSource } from './db'
-import { Match } from './entities'
+import { Match, Journee } from './entities'
 import { toPlain, toPlainArray } from './serialization'
 
 export interface MatchUpdateInput {
   score_home?: number | null
   score_away?: number | null
   date?: string | null
+  arbitre_id?: string | null
 }
 
 function parseDate(value?: string | null) {
@@ -25,7 +26,7 @@ function normalizeScore(value: unknown) {
   return Number.isFinite(num) ? num : null
 }
 
-export async function listMatchesForAdmin(limit = 50, leagueId?: string | null) {
+export async function listMatchesForAdmin(limit = 50, leagueId?: string | null, journeeId?: string | null) {
   const dataSource = await getDataSource()
   const repo = dataSource.getRepository<Match>('matches')
   const qb = repo
@@ -34,8 +35,27 @@ export async function listMatchesForAdmin(limit = 50, leagueId?: string | null) 
     .leftJoinAndSelect('journee.saison', 'saison')
     .leftJoinAndSelect('match.equipe_home', 'equipe_home')
     .leftJoinAndSelect('match.equipe_away', 'equipe_away')
+    .leftJoinAndSelect('match.arbitre', 'arbitre')
     .orderBy('match.date', 'DESC')
     .take(limit)
+
+  if (journeeId) {
+    qb.where('match.journee_id = :journeeId', { journeeId })
+  } else if (leagueId) {
+    qb.where('saison.league_id = :leagueId', { leagueId })
+  }
+
+  const rows = await qb.getMany()
+  return toPlainArray(rows)
+}
+
+export async function fetchJourneesForAdmin(leagueId?: string | null) {
+  const dataSource = await getDataSource()
+  const repo = dataSource.getRepository<Journee>('journees')
+  const qb = repo
+    .createQueryBuilder('journee')
+    .leftJoinAndSelect('journee.saison', 'saison')
+    .orderBy('journee.numero', 'DESC')
 
   if (leagueId) {
     qb.where('saison.league_id = :leagueId', { leagueId })
@@ -54,6 +74,7 @@ export async function updateMatchAdmin(id: string, payload: MatchUpdateInput, le
       equipe_home: true,
       equipe_away: true,
       journee: { saison: true },
+      arbitre: true,
     },
   })
 
@@ -62,21 +83,48 @@ export async function updateMatchAdmin(id: string, payload: MatchUpdateInput, le
   }
 
   if (leagueId && match.journee?.saison?.league_id && match.journee.saison.league_id !== leagueId) {
-    throw new Error('Ce match n’appartient pas à la ligue sélectionnée')
+    throw new Error("Ce match n'appartient pas à la ligue sélectionnée")
   }
 
+  // Construire l'objet de mise à jour
+  const updateData: Partial<Match> = {}
+  
   if (payload.score_home !== undefined) {
-    match.score_home = normalizeScore(payload.score_home)
+    updateData.score_home = normalizeScore(payload.score_home)
   }
   if (payload.score_away !== undefined) {
-    match.score_away = normalizeScore(payload.score_away)
+    updateData.score_away = normalizeScore(payload.score_away)
   }
   if (payload.date !== undefined) {
-    match.date = parseDate(payload.date)
+    updateData.date = parseDate(payload.date)
+  }
+  // Toujours mettre à jour arbitre_id si présent dans le payload
+  if (payload.arbitre_id !== undefined) {
+    // Permettre de définir arbitre_id à null pour supprimer l'arbitre
+    updateData.arbitre_id = payload.arbitre_id === null || payload.arbitre_id === '' ? null : payload.arbitre_id
   }
 
-  const saved = await repo.save(match)
-  return toPlain(saved)
+  // Mettre à jour directement dans la base de données
+  if (Object.keys(updateData).length > 0) {
+    await repo.update(id, updateData)
+  }
+
+  // Recharger avec les relations pour retourner les données complètes
+  const updated = await repo.findOne({
+    where: { id },
+    relations: {
+      equipe_home: true,
+      equipe_away: true,
+      journee: { saison: true },
+      arbitre: true,
+    },
+  })
+  
+  if (!updated) {
+    throw new Error('Match introuvable après mise à jour')
+  }
+  
+  return toPlain(updated)
 }
 
 

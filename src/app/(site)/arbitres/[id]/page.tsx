@@ -3,9 +3,9 @@ import StarsRating from '@/components/StarsRating'
 import { formatDate, formatNote, getLocalizedName } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Vote, Criteres } from '@/types'
+import { Vote, Criteres, Match } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
-import { fetchArbitreById, fetchVotesByArbitre } from '@/lib/dataAccess'
+import { fetchArbitreById, fetchVotesByArbitre, fetchMatchesByArbitre } from '@/lib/dataAccess'
 
 async function getArbitreStats(id: string) {
   // Récupérer l'arbitre
@@ -48,6 +48,9 @@ async function getArbitreStats(id: string) {
     })
   }
 
+  // Récupérer les matchs de l'arbitre
+  const matches = await fetchMatchesByArbitre(id)
+
   return {
     arbitre,
     stats: {
@@ -56,6 +59,7 @@ async function getArbitreStats(id: string) {
       moyenne_criteres: statsCriteres,
     },
     votes: votes || [],
+    matches: matches || [],
   }
 }
 
@@ -73,7 +77,7 @@ export default async function ArbitrePage({
 
   const locale = await getServerLocale()
   const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
-  const { arbitre, stats, votes } = data
+  const { arbitre, stats, votes, matches } = data
   const displayName = getLocalizedName(locale, {
     defaultValue: arbitre.nom,
     fr: arbitre.nom,
@@ -107,20 +111,20 @@ export default async function ArbitrePage({
       </Link>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-start gap-6 mb-6">
+          <div className="flex-shrink-0">
             {arbitre.photo_url ? (
-              <div className="relative w-28 h-28 rounded-full overflow-hidden border border-gray-200">
+              <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-gray-200 shadow-lg">
                 <Image
                   src={arbitre.photo_url}
                   alt={`Photo ${displayName}`}
                   fill
-                  sizes="112px"
+                  sizes="160px"
                   className="object-cover"
                 />
               </div>
             ) : (
-              <div className="w-28 h-28 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-2xl font-semibold border border-blue-200">
+              <div className="w-40 h-40 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-4xl font-semibold border-4 border-blue-200 shadow-lg">
                 {displayName
                   .split(' ')
                   .map((part: string) => part[0])
@@ -129,24 +133,36 @@ export default async function ArbitrePage({
                   .toUpperCase()}
               </div>
             )}
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{displayName}</h1>
-              <div className="space-y-2 text-gray-600">
-                {displayCategory && (
-                  <div>
-                    <span className="font-medium">{t('arbitre.category')}:</span>{' '}
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                      {displayCategory}
-                    </span>
-                  </div>
-                )}
-                {displayNationality && (
-                  <div>
-                    <span className="font-medium">{t('arbitre.nationality')}:</span>{' '}
-                    🇹🇳 {displayNationality}
-                  </div>
-                )}
-              </div>
+          </div>
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold mb-4">{displayName}</h1>
+            <div className="space-y-3 text-gray-600">
+              {displayCategory && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{t('arbitre.category')}:</span>
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md text-sm font-medium">
+                    {displayCategory}
+                  </span>
+                </div>
+              )}
+              {displayNationality && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{t('arbitre.nationality')}:</span>
+                  <span className="text-gray-700">🇹🇳 {displayNationality}</span>
+                </div>
+              )}
+              {arbitre.date_naissance && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{t('arbitre.birthDate')}:</span>
+                  <span className="text-gray-700">
+                    {new Date(arbitre.date_naissance).toLocaleDateString(locale, {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -228,6 +244,61 @@ export default async function ArbitrePage({
                 size="md"
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {matches.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold mb-4">{t('arbitre.matchesTitle')}</h2>
+          <div className="space-y-3">
+            {matches.map((match: Match) => {
+              const homeName = getLocalizedName(locale, {
+                defaultValue: match.equipe_home.nom,
+                fr: match.equipe_home.nom,
+                en: match.equipe_home.nom_en ?? undefined,
+                ar: match.equipe_home.nom_ar ?? undefined,
+              })
+              const awayName = getLocalizedName(locale, {
+                defaultValue: match.equipe_away.nom,
+                fr: match.equipe_away.nom,
+                en: match.equipe_away.nom_en ?? undefined,
+                ar: match.equipe_away.nom_ar ?? undefined,
+              })
+              return (
+                <Link
+                  key={match.id}
+                  href={`/matches/${match.id}`}
+                  className="block border border-gray-200 rounded-lg p-4 hover:bg-gray-50 hover:border-blue-300 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="font-semibold">{homeName}</span>
+                        <span className="text-gray-400">vs</span>
+                        <span className="font-semibold">{awayName}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        {match.date && (
+                          <span>{formatDate(match.date, locale)}</span>
+                        )}
+                        {match.journee && (
+                          <span>
+                            {t('common.matchday')} {match.journee.numero}
+                          </span>
+                        )}
+                        {match.score_home !== null && match.score_away !== null && (
+                          <span className="font-semibold text-gray-900">
+                            {match.score_home} - {match.score_away}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-blue-600 ml-4">→</div>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </div>
       )}

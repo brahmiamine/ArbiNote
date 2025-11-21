@@ -5,7 +5,7 @@ import { useTranslations } from '@/lib/i18n'
 import { useFederationContext } from './FederationContext'
 import { getLocalizedName } from '@/lib/utils'
 
-type Variant = 'light' | 'dark'
+type Variant = 'light' | 'dark' | 'admin'
 
 interface Props {
   variant?: Variant
@@ -17,6 +17,7 @@ export default function FederationSwitcher({ variant = 'light' }: Props) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const isDark = variant === 'dark'
+  const isAdmin = variant === 'admin'
 
   useEffect(() => {
     if (!open) {
@@ -58,11 +59,13 @@ export default function FederationSwitcher({ variant = 'light' }: Props) {
 
   const buttonClasses = isDark
     ? 'flex w-full items-center justify-between rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30'
-    : 'inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70'
+    : isAdmin
+      ? 'inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-sm'
+      : 'inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70'
 
   const dropdownClasses = isDark
-    ? 'absolute right-0 z-50 mt-2 w-80 rounded-lg border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl'
-    : 'absolute right-0 z-50 mt-2 w-80 rounded-lg border border-gray-200 bg-white text-gray-900 shadow-xl'
+    ? 'absolute right-0 z-50 mt-2 w-96 rounded-lg border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl max-h-[80vh] overflow-y-auto'
+    : 'absolute right-0 z-50 mt-2 w-96 rounded-lg border border-gray-200 bg-white text-gray-900 shadow-xl max-h-[80vh] overflow-y-auto'
 
   const sectionTitleClass = isDark
     ? 'text-xs uppercase tracking-wide text-slate-400'
@@ -74,13 +77,16 @@ export default function FederationSwitcher({ variant = 'light' }: Props) {
   const leagueButtonInactive = isDark ? 'hover:bg-slate-800 text-slate-200' : 'hover:bg-gray-100 text-gray-700'
   const tagClass = isDark ? 'text-blue-300' : 'text-blue-600'
   const emptyLeaguesClass = isDark ? 'text-xs text-slate-500' : 'text-xs text-gray-400'
+  const activeLeagueLabelClass = isDark ? 'text-slate-50' : isAdmin ? 'text-gray-900' : 'text-gray-900'
 
   return (
     <div className="relative" ref={containerRef}>
       <button type="button" onClick={() => setOpen((prev) => !prev)} className={buttonClasses} aria-expanded={open}>
-        <span className="truncate max-w-[160px]">{activeLeagueLabel}</span>
+        <span className="flex-1 text-left min-w-0">
+          <span className="block truncate">{activeLeagueLabel}</span>
+        </span>
         <svg
-          className={`h-4 w-4 transition-transform ${open ? 'translate-y-0.5 rotate-180' : ''}`}
+          className={`h-4 w-4 flex-shrink-0 transition-transform ${open ? 'translate-y-0.5 rotate-180' : ''}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -98,7 +104,7 @@ export default function FederationSwitcher({ variant = 'light' }: Props) {
           <div className="p-4 space-y-4 text-sm">
             <div>
               <p className={sectionTitleClass}>{t('federationSwitcher.title')}</p>
-              <p className={`mt-1 font-semibold ${isDark ? 'text-slate-50' : 'text-gray-900'}`}>{activeLeagueLabel}</p>
+              <p className={`mt-1 font-semibold break-words ${activeLeagueLabelClass}`}>{activeLeagueLabel}</p>
               {isSwitching && (
                 <p className="text-xs text-blue-400 animate-pulse mt-1">
                   {t('federationSwitcher.switching')}
@@ -117,12 +123,12 @@ export default function FederationSwitcher({ variant = 'light' }: Props) {
                     ar: federation.nom_ar ?? federation.nom,
                   })
                   return (
-                    <div key={federation.id}>
-                      <p className={federationLabelClass}>{federationLabel}</p>
+                    <div key={federation.id} className="space-y-2">
+                      <p className={`${federationLabelClass} break-words`}>{federationLabel}</p>
                       {federation.leagues.length === 0 ? (
                         <p className={emptyLeaguesClass}>{t('federationSwitcher.noLeagues')}</p>
                       ) : (
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5">
                           {federation.leagues.map((league) => {
                             const label = getLocalizedName(locale, {
                               defaultValue: league.nom,
@@ -139,14 +145,14 @@ export default function FederationSwitcher({ variant = 'light' }: Props) {
                                   switchLeague(league.id)
                                   setOpen(false)
                                 }}
-                                className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition ${
+                                className={`flex w-full items-center justify-between gap-3 rounded-md px-3 py-2.5 text-left text-sm transition ${
                                   isActive ? leagueButtonActive : leagueButtonInactive
                                 }`}
                               >
-                                <span>{label}</span>
+                                <span className="flex-1 min-w-0 break-words">{label}</span>
                                 {isActive && (
-                                  <span className={`text-xs font-medium ${tagClass}`}>
-                                    {t('federationSwitcher.title')}
+                                  <span className={`text-xs font-medium whitespace-nowrap flex-shrink-0 ${tagClass}`}>
+                                    {t('federationSwitcher.selected')}
                                   </span>
                                 )}
                               </button>

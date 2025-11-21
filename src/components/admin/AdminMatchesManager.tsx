@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { Match } from '@/types'
+import type { Match, Journee, Arbitre } from '@/types'
 
 type MatchEdit = {
   score_home: string
   score_away: string
   date: string
+  arbitre_id: string
 }
 
 function toDateTimeInputValue(value: string | null | undefined) {
@@ -23,18 +24,22 @@ function toDateTimeInputValue(value: string | null | undefined) {
 
 function buildEdit(match: Match): MatchEdit {
   return {
-    score_home: match.score_home ?? match.score_home === 0 ? String(match.score_home) : '',
-    score_away: match.score_away ?? match.score_away === 0 ? String(match.score_away) : '',
+    score_home: match.score_home !== null && match.score_home !== undefined ? String(match.score_home) : '',
+    score_away: match.score_away !== null && match.score_away !== undefined ? String(match.score_away) : '',
     date: toDateTimeInputValue(match.date),
+    arbitre_id: match.arbitre_id ?? '',
   }
 }
 
 export default function AdminMatchesManager() {
   const [matches, setMatches] = useState<Match[]>([])
+  const [journees, setJournees] = useState<Journee[]>([])
+  const [arbitres, setArbitres] = useState<Arbitre[]>([])
   const [edits, setEdits] = useState<Record<string, MatchEdit>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [selectedJourneeId, setSelectedJourneeId] = useState<string>('')
 
   const sortedMatches = useMemo(() => {
     return [...matches].sort((a, b) => {
@@ -45,13 +50,52 @@ export default function AdminMatchesManager() {
   }, [matches])
 
   useEffect(() => {
-    loadMatches()
+    loadJournees()
+    loadArbitres()
   }, [])
+
+  useEffect(() => {
+    loadMatches()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedJourneeId])
+
+  async function loadJournees() {
+    try {
+      const response = await fetch('/api/admin/journees', {
+        cache: 'no-store',
+        credentials: 'include',
+      })
+      if (response.ok) {
+        const data = (await response.json()) as Journee[]
+        setJournees(data)
+      }
+    } catch (err) {
+      console.error('Error loading journees:', err)
+    }
+  }
+
+  async function loadArbitres() {
+    try {
+      const response = await fetch('/api/admin/arbitres', {
+        cache: 'no-store',
+        credentials: 'include',
+      })
+      if (response.ok) {
+        const data = (await response.json()) as Arbitre[]
+        setArbitres(data)
+      }
+    } catch (err) {
+      console.error('Error loading arbitres:', err)
+    }
+  }
 
   async function loadMatches() {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/matches?limit=100', {
+      const url = selectedJourneeId
+        ? `/api/admin/matches?limit=100&journeeId=${selectedJourneeId}`
+        : '/api/admin/matches?limit=100'
+      const response = await fetch(url, {
         cache: 'no-store',
         credentials: 'include',
       })
@@ -88,10 +132,14 @@ export default function AdminMatchesManager() {
     const baseline = buildEdit(match)
     const current = edits[match.id]
     if (!current) return false
+    // Normaliser les valeurs vides pour la comparaison
+    const baselineArbitreId = baseline.arbitre_id || ''
+    const currentArbitreId = current.arbitre_id || ''
     return (
       baseline.score_home !== current.score_home ||
       baseline.score_away !== current.score_away ||
-      baseline.date !== current.date
+      baseline.date !== current.date ||
+      baselineArbitreId !== currentArbitreId
     )
   }
 
@@ -100,11 +148,23 @@ export default function AdminMatchesManager() {
     if (!edit) return
     setSavingId(match.id)
     try {
-      const payload = {
-        score_home: edit.score_home === '' ? null : Number(edit.score_home),
-        score_away: edit.score_away === '' ? null : Number(edit.score_away),
-        date: edit.date || null,
+      // Construire le payload avec tous les champs modifiables
+      // Gérer le score 0 comme valeur valide
+      const parseScore = (value: string): number | null => {
+        if (value === '' || value === null || value === undefined) {
+          return null
+        }
+        const num = Number(value)
+        return Number.isFinite(num) ? num : null
       }
+      
+      const payload = {
+        score_home: parseScore(edit.score_home),
+        score_away: parseScore(edit.score_away),
+        date: edit.date || null,
+        arbitre_id: edit.arbitre_id === '' ? null : (edit.arbitre_id || null),
+      }
+      
       const response = await fetch(`/api/admin/matches/${match.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -115,8 +175,19 @@ export default function AdminMatchesManager() {
         const result = await response.json().catch(() => null)
         throw new Error(result?.error ?? 'Sauvegarde impossible')
       }
-      await loadMatches()
+      
+      const updatedMatch = await response.json()
+      
+      // Mettre à jour le match dans l'état
+      setMatches((prev) => prev.map((m) => (m.id === match.id ? updatedMatch : m)))
+      
+      // Mettre à jour les edits avec les nouvelles données
+      setEdits((prev) => ({
+        ...prev,
+        [match.id]: buildEdit(updatedMatch),
+      }))
     } catch (err) {
+      console.error('Error saving match:', err)
       setError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde')
     } finally {
       setSavingId(null)
@@ -128,8 +199,8 @@ export default function AdminMatchesManager() {
       <header className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500 uppercase tracking-wide">Matchs</p>
-          <h1 className="text-3xl font-bold">Gestion des scores et dates</h1>
-          <p className="text-gray-500 mt-1">Modifiez rapidement les scores ou replanifiez un match.</p>
+          <h1 className="text-3xl font-bold">Gestion des matchs</h1>
+          <p className="text-gray-500 mt-1">Modifiez les scores, dates et arbitres des matchs.</p>
         </div>
         <button
           onClick={loadMatches}
@@ -143,6 +214,28 @@ export default function AdminMatchesManager() {
       {error && <div className="p-3 border border-red-200 bg-red-50 text-red-700 rounded">{error}</div>}
 
       <section className="bg-white shadow rounded-lg p-6">
+        <div className="mb-4 flex items-center gap-4">
+          <label htmlFor="journee-filter" className="text-sm font-medium text-gray-700">
+            Filtrer par journée:
+          </label>
+          <select
+            id="journee-filter"
+            value={selectedJourneeId}
+            onChange={(e) => setSelectedJourneeId(e.target.value)}
+            className="border rounded px-3 py-2 text-sm min-w-[200px]"
+          >
+            <option value="">Toutes les journées</option>
+            {journees.map((journee) => (
+              <option key={journee.id} value={journee.id}>
+                Journée {journee.numero}
+                {journee.date_journee
+                  ? ` - ${new Date(journee.date_journee).toLocaleDateString('fr-FR')}`
+                  : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {loading ? (
           <p>Chargement...</p>
         ) : (
@@ -154,6 +247,7 @@ export default function AdminMatchesManager() {
                   <th className="p-2">Journée</th>
                   <th className="p-2">Date</th>
                   <th className="p-2">Score</th>
+                  <th className="p-2">Arbitre</th>
                   <th className="p-2 text-right">Actions</th>
                 </tr>
               </thead>
@@ -174,7 +268,9 @@ export default function AdminMatchesManager() {
                           <div>
                             <div className="font-medium">Journée {match.journee.numero}</div>
                             {match.journee.date_journee && (
-                              <div className="text-xs text-gray-500">{new Date(match.journee.date_journee).toLocaleDateString('fr-FR')}</div>
+                              <div className="text-xs text-gray-500">
+                                {new Date(match.journee.date_journee).toLocaleDateString('fr-FR')}
+                              </div>
                             )}
                           </div>
                         ) : (
@@ -186,7 +282,7 @@ export default function AdminMatchesManager() {
                           type="datetime-local"
                           value={edit.date}
                           onChange={(e) => updateEdit(match.id, 'date', e.target.value)}
-                          className="border rounded px-2 py-1 text-sm"
+                          className="border rounded px-2 py-1 text-sm w-full"
                         />
                       </td>
                       <td className="p-2">
@@ -194,23 +290,55 @@ export default function AdminMatchesManager() {
                           <input
                             type="number"
                             inputMode="numeric"
+                            min="0"
+                            step="1"
                             className="w-16 border rounded px-2 py-1 text-sm"
                             value={edit.score_home}
                             onChange={(e) => updateEdit(match.id, 'score_home', e.target.value)}
+                            placeholder="0"
                           />
                           <span className="text-gray-500">-</span>
                           <input
                             type="number"
                             inputMode="numeric"
+                            min="0"
+                            step="1"
                             className="w-16 border rounded px-2 py-1 text-sm"
                             value={edit.score_away}
                             onChange={(e) => updateEdit(match.id, 'score_away', e.target.value)}
+                            placeholder="0"
                           />
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={edit.arbitre_id}
+                            onChange={(e) => updateEdit(match.id, 'arbitre_id', e.target.value)}
+                            className="border rounded px-2 py-1 text-sm flex-1 min-w-[150px]"
+                          >
+                            <option value="">Aucun arbitre</option>
+                            {arbitres.map((arbitre) => (
+                              <option key={arbitre.id} value={arbitre.id}>
+                                {arbitre.nom}
+                              </option>
+                            ))}
+                          </select>
+                          {edit.arbitre_id && (
+                            <button
+                              type="button"
+                              onClick={() => updateEdit(match.id, 'arbitre_id', '')}
+                              className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                              title="Supprimer l'arbitre"
+                            >
+                              ✕
+                            </button>
+                          )}
                         </div>
                       </td>
                       <td className="p-2 text-right">
                         <button
-                          className="px-4 py-2 bg-blue-600 text-white text-xs rounded disabled:opacity-50"
+                          className="px-4 py-2 bg-blue-600 text-white text-xs rounded disabled:opacity-50 hover:bg-blue-700"
                           disabled={!changed || savingId === match.id}
                           onClick={() => handleSave(match)}
                         >
@@ -228,5 +356,3 @@ export default function AdminMatchesManager() {
     </div>
   )
 }
-
-

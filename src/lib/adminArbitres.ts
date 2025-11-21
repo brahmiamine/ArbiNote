@@ -83,7 +83,11 @@ export async function updateArbitre(id: string, payload: ArbitreInput) {
         ? existing.date_naissance
         : normalizeDate(payload.date_naissance),
     photo_url:
-      payload.photo_url === undefined ? existing.photo_url : normalizeString(payload.photo_url),
+      payload.photo_url === undefined
+        ? existing.photo_url
+        : payload.photo_url === null
+          ? null
+          : normalizeString(payload.photo_url),
   })
 
   const saved = await repo.save(existing)

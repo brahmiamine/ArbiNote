@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getDataSource } from '@/lib/db'
 import { Match, Vote as VoteEntity } from '@/lib/entities'
+import { canVoteMatch } from '@/lib/utils'
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
 
     // Vérifier que le match existe
     const match = await matchRepo.findOne({
-      select: ['id', 'arbitre_id'],
+      select: ['id', 'arbitre_id', 'date'],
       where: { id: match_id },
     })
 
@@ -36,6 +37,14 @@ export async function POST(request: Request) {
     if (match.arbitre_id !== arbitre_id) {
       return NextResponse.json(
         { error: 'Arbitre does not match the match' },
+        { status: 400 }
+      )
+    }
+
+    // Vérifier que le match peut être voté (arbitre attribué et date/heure passée)
+    if (!canVoteMatch({ arbitre_id: match.arbitre_id, date: match.date?.toISOString() })) {
+      return NextResponse.json(
+        { error: 'Cannot vote: match has no referee assigned or match has not started yet' },
         { status: 400 }
       )
     }

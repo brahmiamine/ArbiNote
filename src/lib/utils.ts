@@ -88,3 +88,27 @@ export function getLocalizedName(
   return fr ?? en ?? ar ?? defaultValue
 }
 
+/**
+ * Vérifie si un match peut être voté
+ * Conditions:
+ * - Le match doit avoir un arbitre attribué
+ * - La date/heure du match doit être dans le passé ou égale à aujourd'hui avec l'heure déjà passée
+ */
+export function canVoteMatch(match: { arbitre_id?: string | null; date?: string | null }): boolean {
+  // Vérifier que l'arbitre est attribué
+  if (!match.arbitre_id) {
+    return false
+  }
+
+  // Si pas de date, on ne peut pas voter
+  if (!match.date) {
+    return false
+  }
+
+  const matchDate = new Date(match.date)
+  const now = new Date()
+
+  // Vérifier que la date/heure du match est passée
+  return matchDate <= now
+}
+

@@ -22,9 +22,9 @@ function getMimeType(filename: string) {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
-  const { filename } = params
+  const { filename } = await params
   if (!filename) {
     return NextResponse.json({ error: 'Filename required' }, { status: 400 })
   }

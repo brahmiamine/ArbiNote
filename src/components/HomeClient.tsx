@@ -4,7 +4,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { formatDate, getLocalizedName } from '@/lib/utils'
 import { Journee, Match, Saison } from '@/types'
+import { RankingEntry } from '@/lib/rankings'
 import { useTranslations } from '@/lib/i18n'
+import ArbitreLink from './ArbitreLink'
 
 interface HomeClientProps {
   saisons: Saison[]
@@ -12,160 +14,415 @@ interface HomeClientProps {
     journee: Journee
     matches: Match[]
   }
+  previous?: {
+    journee: Journee
+    matches: Match[]
+  }
+  ranking?: {
+    referees: RankingEntry[]
+    general: RankingEntry[]
+  }
+  stats?: {
+    totalReferees: number
+    totalMatches: number
+    totalJournees: number
+    totalVotes: number
+    seasonLabel?: string
+  }
 }
 
-export default function HomeClient({ saisons, upcoming }: HomeClientProps) {
+export default function HomeClient({ saisons, upcoming, previous, ranking, stats }: HomeClientProps) {
   const { t, locale } = useTranslations()
 
-  return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('home.title')}</h1>
-        <p className="text-xl text-gray-600 mb-8">{t('home.subtitle')}</p>
-      </div>
+  const insightCards = [
+    {
+      id: 'performance',
+      title: t('home.insights.cards.performance.title'),
+      description: t('home.insights.cards.performance.description'),
+      href: '/classement',
+    },
+    {
+      id: 'training',
+      title: t('home.insights.cards.training.title'),
+      description: t('home.insights.cards.training.description'),
+      href: '/admin',
+    },
+    {
+      id: 'community',
+      title: t('home.insights.cards.community.title'),
+      description: t('home.insights.cards.community.description'),
+      href: '/matches',
+    },
+  ]
 
-      {upcoming && upcoming.matches.length > 0 && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4">
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-10 space-y-12">
+      <header className="text-center space-y-3">
+        <p className="text-sm uppercase tracking-wider text-blue-500">ArbiNote</p>
+        <h1 className="text-4xl font-bold text-gray-900">{t('home.title')}</h1>
+        <p className="text-lg text-gray-600">{t('home.subtitle')}</p>
+      </header>
+
+      <section className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-3 mb-4">
             <div>
-              <p className="text-sm uppercase tracking-wide text-gray-500">
-                {t('home.upcoming.badge')}
-              </p>
-              <h3 className="text-2xl font-semibold">
-                {t('home.upcoming.title', {
-                  numero: upcoming.journee.numero.toString(),
-                })}
-              </h3>
-              <p className="text-gray-500">
-                {upcoming.journee.date_journee
-                  ? formatDate(upcoming.journee.date_journee, locale)
-                  : t('common.datePending')}
-              </p>
+              <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.upcoming.badge')}</p>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                {upcoming
+                  ? t('home.upcoming.title', { numero: upcoming.journee.numero.toString() })
+                  : t('home.previous.title')}
+              </h2>
+              {upcoming?.journee.date_journee && (
+                <p className="text-sm text-gray-500">{formatDate(upcoming.journee.date_journee, locale)}</p>
+              )}
             </div>
-            <Link
-              href={`/journees/${upcoming.journee.id}`}
-              className="text-blue-600 hover:underline font-medium"
-            >
-              {t('home.upcoming.cta')}
+            {upcoming && (
+              <Link href={`/journees/${upcoming.journee.id}`} className="text-blue-600 text-sm font-medium hover:underline">
+                {t('home.upcoming.cta')}
+              </Link>
+            )}
+          </div>
+          {upcoming && upcoming.matches.length > 0 ? (
+            <div className="space-y-3">
+              {upcoming.matches.slice(0, 4).map((match) => (
+                <MatchCard key={match.id} match={match} journeeNumber={upcoming.journee.numero} locale={locale} t={t} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">{t('common.emptyMatchesDescription')}</p>
+          )}
+        </div>
+
+        <StatsPanel stats={stats} t={t} />
+      </section>
+
+      {previous && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.previous.title')}</p>
+              <h3 className="text-2xl font-semibold text-gray-900">
+                {t('common.matchday')} {previous.journee.numero}
+              </h3>
+              <p className="text-sm text-gray-500">{t('home.previous.subtitle')}</p>
+            </div>
+            <Link href={`/journees/${previous.journee.id}`} className="text-blue-600 text-sm font-medium hover:underline">
+              {t('home.previous.cta')}
             </Link>
           </div>
-          <div className="space-y-3">
-            {upcoming.matches.map((match) => {
-              const hasScore =
-                match.score_home !== null &&
-                match.score_home !== undefined &&
-                match.score_away !== null &&
-                match.score_away !== undefined
+          {previous.matches.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {previous.matches.slice(0, 4).map((match) => (
+                <PreviousMatchCard key={match.id} match={match} locale={locale} t={t} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">{t('home.previous.empty')}</p>
+          )}
+        </section>
+      )}
 
-              const kickoff = match.date
-                ? formatDate(match.date, locale)
-                : upcoming.journee.date_journee
-                ? formatDate(upcoming.journee.date_journee, locale)
-                : t('common.datePending')
+      {ranking && (
+        <section className="grid gap-6 lg:grid-cols-2">
+          <RankingBoard
+            title={t('home.rankings.referees')}
+            subtitle={t('home.rankings.subtitle')}
+            entries={ranking.referees}
+            locale={locale}
+            t={t}
+          />
+          <RankingBoard
+            title={t('home.rankings.general')}
+            subtitle={t('home.rankings.subtitle')}
+            entries={ranking.general}
+            locale={locale}
+            t={t}
+          />
+        </section>
+      )}
 
-              return (
-                <Link
-                  key={match.id}
-                  href={`/matches/${match.id}`}
-                  className="block p-4 card rounded-lg space-y-3 border border-transparent hover:border-blue-200 transition-colors"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center justify-between gap-4">
-                        <TeamDisplay team={match.equipe_home} locale={locale} />
-                        <div className="text-center">
-                          <p className="text-xs uppercase text-gray-500">{t('common.date')}</p>
-                          <p className="text-sm font-medium text-gray-800">{kickoff}</p>
-                        </div>
-                        <TeamDisplay team={match.equipe_away} align="end" locale={locale} />
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>{t('common.matchday')} {upcoming.journee.numero}</span>
-                        <span>{match.date ? t('home.upcoming.notPlayed') : t('common.datePending')}</span>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      {hasScore ? (
-                        <p className="text-2xl font-bold text-gray-900">
-                          {match.score_home} - {match.score_away}
-                        </p>
-                      ) : (
-                        <p className="text-sm text-gray-600">{t('home.upcoming.notPlayed')}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-sm text-gray-600 flex items-center justify-between">
-                    <span>{t('common.referee')}:</span>
-                    <span className="font-medium">
-                      {match.arbitre?.nom ?? t('common.noRefereeAssigned')}
-                    </span>
-                  </div>
-                </Link>
-              )
-            })}
+      <section className="grid gap-4 md:grid-cols-3">
+        <QuickLinkCard href="/saisons" title="📆" label={t('nav.seasons')} description={t('home.seasons.description')} />
+        <QuickLinkCard href="/matches" title="⚽" label={t('nav.matches')} description={t('home.matches.description')} />
+        <QuickLinkCard href="/classement" title="🏆" label={t('nav.rankings')} description={t('home.rankings.description')} />
+      </section>
+
+      {saisons.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.featuredSeasons')}</p>
+              <h3 className="text-2xl font-semibold text-gray-900">{t('home.viewDays')}</h3>
+            </div>
+            <Link href="/saisons" className="text-sm font-medium text-blue-600 hover:underline">
+              {t('common.viewDays')}
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {saisons.map((saison) => (
+              <Link key={saison.id} href={`/saisons/${saison.id}`} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition">
+                <p className="text-lg font-semibold text-gray-900">{saison.nom}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {saison.date_debut ? formatDate(saison.date_debut, locale) : '?'} — {saison.date_fin ? formatDate(saison.date_fin, locale) : '?'}
+                </p>
+                <p className="text-sm text-blue-600 mt-3">{t('home.viewDays')}</p>
+              </Link>
+            ))}
           </div>
         </section>
       )}
 
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
-        <Link
-          href="/saisons"
-          className="p-6 card rounded-lg shadow-md hover:shadow-lg transition-shadow"
-        >
-          <h2 className="text-2xl font-bold text-blue-600 mb-2">📆 {t('nav.seasons')}</h2>
-          <p className="text-gray-600">{t('home.seasons.description')}</p>
-        </Link>
-        <Link
-          href="/matches"
-          className="p-6 card rounded-lg shadow-md hover:shadow-lg transition-shadow"
-        >
-          <h2 className="text-2xl font-bold text-blue-600 mb-2">⚽ {t('nav.matches')}</h2>
-          <p className="text-gray-600">{t('home.matches.description')}</p>
-        </Link>
-        <Link
-          href="/classement"
-          className="p-6 card rounded-lg shadow-md hover:shadow-lg transition-shadow"
-        >
-          <h2 className="text-2xl font-bold text-blue-600 mb-2">🏆 {t('nav.rankings')}</h2>
-          <p className="text-gray-600">{t('home.rankings.description')}</p>
-        </Link>
-      </div>
-
-      {saisons.length > 0 && (
-        <div className="mb-12">
-          <h3 className="text-2xl font-semibold mb-4">{t('home.featuredSeasons')}</h3>
-          <div className="grid md:grid-cols-2 gap-4">
-            {saisons.map((saison) => (
-              <Link
-                key={saison.id}
-                href={`/saisons/${saison.id}`}
-                className="p-5 card rounded-lg hover:shadow-sm transition-shadow"
-              >
-                <p className="text-blue-700 font-semibold text-lg">
-                  {saison.nom}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">
-                  {saison.date_debut ? formatDate(saison.date_debut, locale) : '?'} —{' '}
-                  {saison.date_fin ? formatDate(saison.date_fin, locale) : '?'}
-                </p>
-                <p className="text-sm text-gray-500 mt-2">{t('home.viewDays')}</p>
-              </Link>
-            ))}
-          </div>
+      <section className="space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.insights.title')}</p>
+          <h3 className="text-2xl font-semibold text-gray-900">{t('home.insights.subtitle')}</h3>
         </div>
-      )}
+        <div className="grid gap-4 md:grid-cols-3">
+          {insightCards.map((card) => (
+            <div key={card.id} className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 text-white shadow-lg">
+              <h4 className="text-lg font-semibold">{card.title}</h4>
+              <p className="text-sm text-slate-200 mt-2">{card.description}</p>
+              <Link href={card.href} className="inline-flex items-center gap-1 text-sm font-medium text-blue-200 mt-4 hover:text-white">
+                {t('home.insights.read')}
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-blue-900 dark:text-blue-200 mb-2">
-          {t('home.howItWorks.title')}
-        </h3>
-        <ul className="space-y-2 text-gray-700 dark:text-gray-200">
-          <li>{t('home.howItWorks.step1')}</li>
-          <li>{t('home.howItWorks.step2')}</li>
-          <li>{t('home.howItWorks.step3')}</li>
+      <section className="rounded-3xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-950">
+        <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-2">{t('home.howItWorks.title')}</h3>
+        <ul className="grid gap-3 text-gray-700 dark:text-gray-200 md:grid-cols-3">
+          <li className="rounded-2xl bg-white/70 px-4 py-3 text-sm font-medium shadow-sm dark:bg-blue-900/40">
+            {t('home.howItWorks.step1')}
+          </li>
+          <li className="rounded-2xl bg-white/70 px-4 py-3 text-sm font-medium shadow-sm dark:bg-blue-900/40">
+            {t('home.howItWorks.step2')}
+          </li>
+          <li className="rounded-2xl bg-white/70 px-4 py-3 text-sm font-medium shadow-sm dark:bg-blue-900/40">
+            {t('home.howItWorks.step3')}
+          </li>
         </ul>
+      </section>
+    </div>
+  )
+}
+
+function MatchCard({
+  match,
+  journeeNumber,
+  locale,
+  t,
+}: {
+  match: Match
+  journeeNumber: number
+  locale: string
+  t: (key: string, params?: Record<string, string | number>) => string
+}) {
+  const kickoff = match.date ? formatDate(match.date, locale) : t('common.datePending')
+  const hasScore =
+    match.score_home !== null &&
+    match.score_home !== undefined &&
+    match.score_away !== null &&
+    match.score_away !== undefined
+
+  return (
+    <Link
+      href={`/matches/${match.id}`}
+      className="block rounded-2xl border border-slate-200 p-4 hover:border-blue-200 hover:shadow-md transition"
+    >
+      <div className="flex items-center justify-between text-xs uppercase text-gray-400 mb-2">
+        <span>
+          {t('common.matchday')} {journeeNumber}
+        </span>
+        <span>{kickoff}</span>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <TeamDisplay team={match.equipe_home} locale={locale} />
+        <div className="text-center">
+          <p className="text-lg font-semibold text-gray-900">
+            {hasScore ? `${match.score_home} - ${match.score_away}` : t('home.upcoming.notPlayed')}
+          </p>
+          <p className="text-xs text-gray-500">{match.date ? t('home.upcoming.notPlayed') : t('common.datePending')}</p>
+        </div>
+        <TeamDisplay team={match.equipe_away} align="end" locale={locale} />
+      </div>
+      <div className="text-xs text-gray-500 mt-3 flex items-center justify-between">
+        <span>{t('common.referee')}</span>
+        {match.arbitre ? (
+          <ArbitreLink
+            arbitreId={match.arbitre.id}
+            photoUrl={null}
+            name={match.arbitre.nom}
+            category={null}
+            showPhoto={false}
+          />
+        ) : (
+          <span className="font-medium text-gray-700">{t('common.noRefereeAssigned')}</span>
+        )}
+      </div>
+    </Link>
+  )
+}
+
+function PreviousMatchCard({
+  match,
+  locale,
+  t,
+}: {
+  match: Match
+  locale: string
+  t: (key: string) => string
+}) {
+  const score =
+    match.score_home !== null && match.score_home !== undefined && match.score_away !== null && match.score_away !== undefined
+      ? `${match.score_home} - ${match.score_away}`
+      : '—'
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="text-xs uppercase tracking-wide text-gray-400 flex items-center justify-between mb-3">
+        <span>{match.date ? formatDate(match.date, locale) : t('common.datePending')}</span>
+        <span>{match.journee?.saison?.nom ?? ''}</span>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <TeamDisplay team={match.equipe_home} locale={locale} />
+        <p className="text-xl font-semibold text-gray-900">{score}</p>
+        <TeamDisplay team={match.equipe_away} align="end" locale={locale} />
+      </div>
+      <div className="text-xs text-gray-500 mt-3 flex items-center justify-between">
+        <span>{t('common.referee')}</span>
+        {match.arbitre ? (
+          <Link
+            href={`/arbitres/${match.arbitre.id}`}
+            className="font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            {match.arbitre.nom}
+          </Link>
+        ) : (
+          <span className="font-semibold text-gray-700">{t('common.noRefereeAssigned')}</span>
+        )}
       </div>
     </div>
+  )
+}
+
+function StatsPanel({
+  stats,
+  t,
+}: {
+  stats?: {
+    totalReferees: number
+    totalMatches: number
+    totalJournees: number
+    totalVotes: number
+    seasonLabel?: string
+  }
+  t: (key: string, params?: Record<string, string | number>) => string
+}) {
+  const items = [
+    { label: t('home.stats.referees'), value: stats?.totalReferees ?? 0 },
+    { label: t('home.stats.matches'), value: stats?.totalMatches ?? 0 },
+    { label: t('home.stats.journees'), value: stats?.totalJournees ?? 0 },
+    { label: t('home.stats.votes'), value: stats?.totalVotes ?? 0 },
+  ]
+
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-lg">
+      <p className="text-xs uppercase tracking-wide text-slate-300 mb-1">
+        {t('home.stats.title', { season: stats?.seasonLabel ?? '' })}
+      </p>
+      <h3 className="text-2xl font-semibold mb-4">{stats?.seasonLabel ?? '—'}</h3>
+      <div className="grid gap-4">
+        {items.map((item) => (
+          <div key={item.label} className="rounded-2xl bg-white/10 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-300">{item.label}</p>
+            <p className="text-2xl font-bold">{item.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function RankingBoard({
+  title,
+  subtitle,
+  entries,
+  locale,
+  t,
+}: {
+  title: string
+  subtitle: string
+  entries: RankingEntry[]
+  locale: string
+  t: (key: string, params?: Record<string, string | number>) => string
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray-400">{subtitle}</p>
+            <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+          </div>
+      </div>
+      {entries.length === 0 ? (
+        <p className="text-sm text-gray-500">{t('home.rankings.empty')}</p>
+      ) : (
+        <ul className="space-y-3">
+          {entries.map((entry, index) => (
+            <li
+              key={entry.arbitreId}
+              className="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3"
+            >
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {index + 1}.{' '}
+                  {getLocalizedName(locale, {
+                    defaultValue: entry.nom,
+                    fr: entry.nom,
+                    en: entry.nom_en ?? undefined,
+                    ar: entry.nom_ar ?? undefined,
+                  })}
+                </p>
+                <p className="text-xs text-gray-500">{t('home.rankings.votes', { count: entry.votes })}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-semibold text-gray-900">{entry.moyenne.toFixed(2)}</p>
+                <p className="text-xs text-gray-500">{t('common.globalNote')}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function QuickLinkCard({
+  href,
+  title,
+  label,
+  description,
+}: {
+  href: string
+  title: string
+  label: string
+  description: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition flex flex-col gap-2"
+    >
+      <span className="text-2xl" aria-hidden>
+        {title}
+      </span>
+      <p className="text-lg font-semibold text-gray-900">{label}</p>
+      <p className="text-sm text-gray-600">{description}</p>
+    </Link>
   )
 }
 

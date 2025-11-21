@@ -158,6 +158,21 @@ export async function fetchVotesByArbitre(arbitreId: string) {
   return toPlainArray(rows)
 }
 
+export async function fetchMatchesByArbitre(arbitreId: string) {
+  const dataSource = await getDataSource()
+  const repo = dataSource.getRepository<Match>('matches')
+  const rows = await repo.find({
+    where: { arbitre_id: arbitreId },
+    relations: {
+      equipe_home: true,
+      equipe_away: true,
+      journee: { saison: true },
+    },
+    order: { date: 'DESC' },
+  })
+  return toPlainArray(rows)
+}
+
 export async function fetchArbitreById(id: string) {
   const dataSource = await getDataSource()
   const repo = dataSource.getRepository<Arbitre>('arbitres')

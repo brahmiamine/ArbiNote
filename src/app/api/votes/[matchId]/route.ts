@@ -1,25 +1,41 @@
 import { NextResponse } from 'next/server'
 import { getDataSource } from '@/lib/db'
 import { Vote } from '@/lib/entities'
+import { toPlainArray } from '@/lib/serialization'
 
 export async function GET(
   request: Request,
-  { params }: { params: { matchId: string } }
+  { params }: { params: Promise<{ matchId: string }> }
 ) {
   try {
-    const matchId = params.matchId
+    const { matchId } = await params
+
+    console.log('Fetching votes for match:', matchId)
 
     const dataSource = await getDataSource()
-    const votes = await dataSource.getRepository(Vote).find({
+    const voteRepo = dataSource.getRepository<Vote>('votes')
+    const votes = await voteRepo.find({
       where: { match_id: matchId },
       order: { created_at: 'DESC' },
     })
 
-    return NextResponse.json(votes)
+    console.log('Votes found:', votes.length)
+
+    // Serialize votes properly
+    const votesData = toPlainArray(votes).map((vote: any) => ({
+      ...vote,
+      note_globale: typeof vote.note_globale === 'string' 
+        ? parseFloat(vote.note_globale) 
+        : vote.note_globale,
+    }))
+
+    return NextResponse.json(votesData)
   } catch (error) {
-    console.error('Unexpected error:', error)
+    console.error('Unexpected error in /api/votes/[matchId]:', error)
+    console.error('Error details:', error instanceof Error ? error.message : String(error))
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

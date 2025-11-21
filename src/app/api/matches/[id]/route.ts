@@ -3,10 +3,10 @@ import { fetchMatchById } from '@/lib/dataAccess'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const matchId = params.id
+    const { id: matchId } = await params
 
     const match = await fetchMatchById(matchId)
 

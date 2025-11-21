@@ -6,7 +6,7 @@ export class Journee {
   @PrimaryGeneratedColumn('uuid')
   id!: string
 
-  @ManyToOne(() => Saison, (saison) => saison.journees, {
+  @ManyToOne(() => Saison, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'saison_id' })

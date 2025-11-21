@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { formatDate, getLocalizedName } from '@/lib/utils'
@@ -7,6 +8,7 @@ import { Journee, Match, Saison } from '@/types'
 import { RankingEntry } from '@/lib/rankings'
 import { useTranslations } from '@/lib/i18n'
 import ArbitreLink from './ArbitreLink'
+import { useFederationContext } from './FederationContext'
 
 interface HomeClientProps {
   saisons: Saison[]
@@ -33,6 +35,19 @@ interface HomeClientProps {
 
 export default function HomeClient({ saisons, upcoming, previous, ranking, stats }: HomeClientProps) {
   const { t, locale } = useTranslations()
+  const { federations, activeLeagueId } = useFederationContext()
+
+  // Trouver la ligue active et sa fédération
+  const activeLeague = useMemo(() => {
+    if (!activeLeagueId) return null
+    for (const fed of federations) {
+      const league = fed.leagues.find((l) => l.id === activeLeagueId)
+      if (league) {
+        return { federation: fed, league }
+      }
+    }
+    return null
+  }, [federations, activeLeagueId])
 
   const insightCards = [
     {
@@ -58,7 +73,51 @@ export default function HomeClient({ saisons, upcoming, previous, ranking, stats
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-12">
       <header className="text-center space-y-3">
-        <p className="text-sm uppercase tracking-wider text-blue-500">ArbiNote</p>
+        {/* Logos de la fédération et de la ligue */}
+        {activeLeague && (
+          <div className="flex items-center justify-center gap-4 mb-4">
+            {activeLeague.federation.logo_url && (
+              <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+                <img
+                  src={activeLeague.federation.logo_url}
+                  alt={activeLeague.federation.nom}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                    const parent = target.parentElement
+                    if (parent && !parent.querySelector('.placeholder')) {
+                      const placeholder = document.createElement('div')
+                      placeholder.className = 'placeholder w-full h-full bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400 font-semibold'
+                      placeholder.textContent = activeLeague.federation.code || '—'
+                      parent.appendChild(placeholder)
+                    }
+                  }}
+                />
+              </div>
+            )}
+            {activeLeague.league.logo_url && (
+              <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+                <img
+                  src={activeLeague.league.logo_url}
+                  alt={activeLeague.league.nom}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                    const parent = target.parentElement
+                    if (parent && !parent.querySelector('.placeholder')) {
+                      const placeholder = document.createElement('div')
+                      placeholder.className = 'placeholder w-full h-full bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400 font-semibold'
+                      placeholder.textContent = activeLeague.league.nom.charAt(0).toUpperCase() || '—'
+                      parent.appendChild(placeholder)
+                    }
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
         <h1 className="text-4xl font-bold text-gray-900">{t('home.title')}</h1>
         <p className="text-lg text-gray-600">{t('home.subtitle')}</p>
       </header>
@@ -285,7 +344,7 @@ function PreviousMatchCard({
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="text-xs uppercase tracking-wide text-gray-400 flex items-center justify-between mb-3">
         <span>{match.date ? formatDate(match.date, locale) : t('common.datePending')}</span>
-        <span>{match.journee?.saison?.nom ?? ''}</span>
+        <span>{(match.journee as any)?.saison?.nom ?? ''}</span>
       </div>
       <div className="flex items-center justify-between gap-3">
         <TeamDisplay team={match.equipe_home} locale={locale} />

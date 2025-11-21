@@ -8,7 +8,7 @@ import { getActiveLeagueId } from '@/lib/leagueSelection'
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const federations = await fetchFederationsWithLeagues()
   const availableLeagueIds = new Set(
-    federations.flatMap((fed) => fed.leagues.map((league) => league.id))
+    federations.flatMap((fed: any) => fed.leagues.map((league: any) => league.id))
   )
 
   let activeLeagueId = await getActiveLeagueId()

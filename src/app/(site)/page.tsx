@@ -73,12 +73,12 @@ export default async function Home() {
     const arbitreCriteres = criteresDefinitions.filter((critere) => critere.categorie === 'arbitre')
     const generalCriteres = criteresDefinitions
 
-    const refereeRanking = buildRanking(votes, {
-      criteres: arbitreCriteres,
+    const refereeRanking = buildRanking(votes as any, {
+      criteres: arbitreCriteres as any,
       includeCategories: ['arbitre'],
     })
-    const generalRanking = buildRanking(votes, {
-      criteres: generalCriteres,
+    const generalRanking = buildRanking(votes as any, {
+      criteres: generalCriteres as any,
       includeCategories: ['arbitre', 'var', 'assistant'],
     })
 
@@ -99,9 +99,9 @@ export default async function Home() {
 
   return (
     <HomeClient
-      saisons={saisons}
-      upcoming={upcoming ?? undefined}
-      previous={previousSection ?? undefined}
+      saisons={saisons as any}
+      upcoming={upcoming as any ?? undefined}
+      previous={previousSection as any ?? undefined}
       ranking={rankingPreview ?? undefined}
       stats={statsSummary ?? undefined}
     />

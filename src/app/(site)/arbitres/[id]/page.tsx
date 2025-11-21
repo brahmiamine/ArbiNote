@@ -3,7 +3,7 @@ import StarsRating from '@/components/StarsRating'
 import { formatDate, formatNote, getLocalizedName } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Vote, Criteres, Match } from '@/types'
+import { Vote, Criteres, Match as MatchType } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
 import { fetchArbitreById, fetchVotesByArbitre, fetchMatchesByArbitre } from '@/lib/dataAccess'
 
@@ -85,11 +85,11 @@ export default async function ArbitrePage({
     ar: arbitre.nom_ar ?? undefined,
   })
   const displayCategory =
-    arbitre.categorie || arbitre.categorie_ar
+    (arbitre as any).categorie || (arbitre as any).categorie_ar
       ? getLocalizedName(locale, {
-          defaultValue: arbitre.categorie ?? arbitre.categorie_ar ?? '',
-          fr: arbitre.categorie ?? undefined,
-          ar: arbitre.categorie_ar ?? undefined,
+          defaultValue: (arbitre as any).categorie ?? (arbitre as any).categorie_ar ?? '',
+          fr: (arbitre as any).categorie ?? undefined,
+          ar: (arbitre as any).categorie_ar ?? undefined,
         })
       : null
   const displayNationality =
@@ -252,7 +252,7 @@ export default async function ArbitrePage({
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-bold mb-4">{t('arbitre.matchesTitle')}</h2>
           <div className="space-y-3">
-            {matches.map((match: Match) => {
+            {(matches as any[]).map((match: any) => {
               const homeName = getLocalizedName(locale, {
                 defaultValue: match.equipe_home.nom,
                 fr: match.equipe_home.nom,

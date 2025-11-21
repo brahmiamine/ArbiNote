@@ -245,6 +245,29 @@ export default function AdminArbitresManager() {
     }
   }
 
+  async function handleDelete(id: string) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet arbitre ?')) return
+    setError(null)
+    try {
+      const response = await fetch(`/api/admin/arbitres/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({ error: 'Erreur' }))
+        throw new Error(payload.error || 'Suppression impossible')
+      }
+      // Si on supprime l'arbitre en cours d'édition, annuler l'édition
+      if (editingId === id) {
+        setEditingId(null)
+        setEditForm({ ...emptyForm })
+      }
+      await loadArbitres()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la suppression')
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header avec bouton Ajouter */}
@@ -450,19 +473,30 @@ export default function AdminArbitresManager() {
                           )}
                         </td>
                         <td className="p-3 text-right">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              startEdit(arbitre)
-                            }}
-                            className={`px-4 py-1.5 rounded text-xs font-medium transition-colors ${
-                              editingId === arbitre.id
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                startEdit(arbitre)
+                              }}
+                              className={`px-4 py-1.5 rounded text-xs font-medium transition-colors ${
+                                editingId === arbitre.id
                                 ? 'bg-blue-700 text-white'
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                             }`}
                           >
                             {editingId === arbitre.id ? 'En cours...' : 'Modifier'}
                           </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDelete(arbitre.id)
+                            }}
+                            className="px-4 py-1.5 rounded text-xs font-medium transition-colors bg-red-600 text-white hover:bg-red-700"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
                         </td>
                       </tr>
                     ))

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import VoteForm from '@/components/VoteForm'
+import AlreadyVotedSection from '@/components/AlreadyVotedSection'
 import { formatDate, getLocalizedName, canVoteMatch } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -77,11 +78,11 @@ export default async function MatchDetailPage({
   const refereeCategory =
     arbitre &&
     typeof arbitre === 'object' &&
-    (arbitre.categorie || arbitre.categorie_ar)
+    ((arbitre as any).categorie || (arbitre as any).categorie_ar)
       ? getLocalizedName(locale, {
-          defaultValue: arbitre.categorie ?? arbitre.categorie_ar ?? '',
-          fr: arbitre.categorie ?? undefined,
-          ar: arbitre.categorie_ar ?? undefined,
+          defaultValue: (arbitre as any).categorie ?? (arbitre as any).categorie_ar ?? '',
+          fr: (arbitre as any).categorie ?? undefined,
+          ar: (arbitre as any).categorie_ar ?? undefined,
         })
       : null
 
@@ -215,17 +216,24 @@ export default async function MatchDetailPage({
         </div>
       </div>
 
-      {arbitre && typeof arbitre === 'object' && canVoteMatch(match) && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold mb-4">{t('matchDetail.voteTitle')}</h2>
+      {arbitre && typeof arbitre === 'object' && canVoteMatch(match as any) && (
+        <>
           <VoteForm
             matchId={match.id}
             arbitreId={arbitre.id}
             arbitreNom={refereeName ?? arbitre.nom}
             criteresDefs={criteresDefinitions}
-            matchDate={match.date}
+            matchDate={match.date ? (typeof match.date === 'string' ? match.date : match.date.toISOString()) : null}
           />
-        </div>
+          <AlreadyVotedSection
+            matchId={match.id}
+            arbitreId={arbitre.id}
+            arbitreNom={refereeName ?? arbitre.nom}
+            arbitrePhotoUrl={arbitre.photo_url || null}
+            arbitreCategory={refereeCategory || null}
+            criteresDefs={criteresDefinitions}
+          />
+        </>
       )}
 
       {(!arbitre || typeof arbitre !== 'object') && (
@@ -236,7 +244,7 @@ export default async function MatchDetailPage({
         </div>
       )}
 
-      {arbitre && typeof arbitre === 'object' && !canVoteMatch(match) && (
+      {arbitre && typeof arbitre === 'object' && !canVoteMatch(match as any) && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
           <p className="text-yellow-800">
             {t('matchDetail.cannotVote')}

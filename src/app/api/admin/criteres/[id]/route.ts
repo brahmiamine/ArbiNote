@@ -6,14 +6,15 @@ export const runtime = 'nodejs'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const unauthorized = ensureAdminAuth(request)
   if (unauthorized) return unauthorized
 
   try {
+    const { id } = await params
     const body = await request.json()
-    const critere = await updateCritere(params.id, body)
+    const critere = await updateCritere(id, body)
     return NextResponse.json(critere)
   } catch (error) {
     console.error('Error updating critere:', error)
@@ -26,13 +27,14 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const unauthorized = ensureAdminAuth(request)
   if (unauthorized) return unauthorized
 
   try {
-    await deleteCritere(params.id)
+    const { id } = await params
+    await deleteCritere(id)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting critere:', error)

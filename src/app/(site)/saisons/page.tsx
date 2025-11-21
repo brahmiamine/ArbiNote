@@ -13,7 +13,7 @@ export default async function SaisonsPage() {
   let error: string | null = null
 
   try {
-    saisons = await fetchAllSaisons(leagueId ?? undefined)
+    saisons = await fetchAllSaisons(leagueId ?? undefined) as any
   } catch (err) {
     error = err instanceof Error ? err.message : t('saisons.error')
   }

@@ -22,7 +22,7 @@ export class Vote {
   @Column({ type: 'uuid' })
   match_id!: string
 
-  @ManyToOne(() => Arbitre, (arbitre) => arbitre.votes, {
+  @ManyToOne(() => Arbitre, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'arbitre_id' })

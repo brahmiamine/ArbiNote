@@ -1,6 +1,5 @@
 import type { NextConfig } from 'next'
 import path from 'path'
-import webpack from 'webpack'
 
 const OPTIONAL_DB_PACKAGES = [
   '@sap/hana-client',
@@ -29,7 +28,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack(config) {
+  webpack(config, { isServer }) {
     config.resolve = config.resolve || {}
     config.resolve.alias = config.resolve.alias || {}
 
@@ -43,17 +42,20 @@ const nextConfig: NextConfig = {
     config.module = config.module || {}
     config.module.exprContextCritical = false
 
-    config.plugins = config.plugins || []
-    config.plugins.push(
-      new webpack.IgnorePlugin({
-        checkResource(resource) {
-          return (
-            OPTIONAL_DB_PACKAGES.includes(resource) ||
-            TYPEORM_WARNING_REGEX.test(resource ?? '')
-          )
-        },
-      })
-    )
+    if (!isServer) {
+      const webpack = require('webpack')
+      config.plugins = config.plugins || []
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          checkResource(resource: string) {
+            return (
+              OPTIONAL_DB_PACKAGES.includes(resource) ||
+              TYPEORM_WARNING_REGEX.test(resource ?? '')
+            )
+          },
+        })
+      )
+    }
 
     config.ignoreWarnings = config.ignoreWarnings || []
     config.ignoreWarnings.push({

@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 interface StarsRatingProps {
   value: number
-  onChange: (value: number) => void
+  onChange?: (value: number) => void
   readOnly?: boolean
   size?: 'sm' | 'md' | 'lg'
 }
@@ -24,7 +24,7 @@ export default function StarsRating({
   }
 
   const handleClick = (newValue: number) => {
-    if (!readOnly) {
+    if (!readOnly && onChange) {
       onChange(newValue)
     }
   }

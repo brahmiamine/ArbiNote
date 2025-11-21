@@ -4,10 +4,10 @@ import { fetchArbitreById, fetchVotesByArbitre } from '@/lib/dataAccess'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const arbitreId = params.id
+    const { id: arbitreId } = await params
 
     // Récupérer l'arbitre
     const arbitre = await fetchArbitreById(arbitreId)

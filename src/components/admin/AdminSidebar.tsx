@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 
 const navItems = [
   { label: 'Tableau de bord', href: '/admin' },
+  { label: 'Fédérations', href: '/admin/federations' },
+  { label: 'Ligues', href: '/admin/leagues' },
   { label: 'Journées', href: '/admin/journees' },
   { label: 'Matchs', href: '/admin/matches' },
   { label: 'Critères', href: '/admin/criteres' },

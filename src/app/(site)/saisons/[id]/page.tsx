@@ -14,11 +14,11 @@ import {
 } from '@/lib/dataAccess'
 
 async function getSaison(id: string): Promise<Saison | null> {
-  return fetchSaisonById(id)
+  return fetchSaisonById(id) as any
 }
 
 async function getJournees(saisonId: string): Promise<Journee[]> {
-  return fetchJourneesBySaison(saisonId)
+  return fetchJourneesBySaison(saisonId) as any
 }
 
 export default async function SaisonDetailPage({

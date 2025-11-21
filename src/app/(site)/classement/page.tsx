@@ -5,6 +5,7 @@ import { CritereDefinition, Vote } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
 import { getLocalizedName } from '@/lib/utils'
 import {
+  fetchArbitres,
   fetchCritereDefinitions,
   fetchJourneesBySaison,
   fetchLatestSaison,
@@ -79,8 +80,23 @@ export default async function ClassementPage() {
     return { journee, best: ranking[0] ?? null }
   })
 
+  // Données pour les aperçus et stats
+  const rankingPreview = {
+    referees: refereeRanking.slice(0, 5),
+    general: generalRanking.slice(0, 5),
+  }
+
+  const arbitres = await fetchArbitres()
+  const statsSummary = {
+    totalReferees: arbitres.length,
+    totalMatches: matchIds.length,
+    totalJournees: journees.length,
+    totalVotes: votes.length,
+    seasonLabel: saison.nom,
+  }
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">{t('classement.title')}</h1>
@@ -95,6 +111,104 @@ export default async function ClassementPage() {
           {t('classement.viewDays')}
         </Link>
       </div>
+
+      {/* Vue d'ensemble (StatsPanel) */}
+      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-lg">
+        <p className="text-xs uppercase tracking-wide text-slate-300 mb-1">
+          {t('home.stats.title', { season: statsSummary.seasonLabel })}
+        </p>
+        <h3 className="text-2xl font-semibold mb-4">{statsSummary.seasonLabel}</h3>
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="rounded-2xl bg-white/10 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-300">{t('home.stats.referees')}</p>
+            <p className="text-2xl font-bold">{statsSummary.totalReferees}</p>
+          </div>
+          <div className="rounded-2xl bg-white/10 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-300">{t('home.stats.matches')}</p>
+            <p className="text-2xl font-bold">{statsSummary.totalMatches}</p>
+          </div>
+          <div className="rounded-2xl bg-white/10 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-300">{t('home.stats.journees')}</p>
+            <p className="text-2xl font-bold">{statsSummary.totalJournees}</p>
+          </div>
+          <div className="rounded-2xl bg-white/10 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-300">{t('home.stats.votes')}</p>
+            <p className="text-2xl font-bold">{statsSummary.totalVotes}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Aperçu basé sur les dernières notes */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.rankings.subtitle')}</p>
+              <h3 className="text-xl font-semibold text-gray-900">{t('home.rankings.referees')}</h3>
+            </div>
+          </div>
+          {rankingPreview.referees.length === 0 ? (
+            <p className="text-sm text-gray-500">{t('home.rankings.empty')}</p>
+          ) : (
+            <ul className="space-y-3">
+              {rankingPreview.referees.map((entry, index) => (
+                <li key={entry.arbitreId} className="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {index + 1}.{' '}
+                      {getLocalizedName(locale, {
+                        defaultValue: entry.nom,
+                        fr: entry.nom,
+                        en: entry.nom_en ?? undefined,
+                        ar: entry.nom_ar ?? undefined,
+                      })}
+                    </p>
+                    <p className="text-xs text-gray-500">{t('home.rankings.votes', { count: entry.votes })}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-semibold text-gray-900">{entry.moyenne.toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">{t('common.globalNote')}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.rankings.subtitle')}</p>
+              <h3 className="text-xl font-semibold text-gray-900">{t('home.rankings.general')}</h3>
+            </div>
+          </div>
+          {rankingPreview.general.length === 0 ? (
+            <p className="text-sm text-gray-500">{t('home.rankings.empty')}</p>
+          ) : (
+            <ul className="space-y-3">
+              {rankingPreview.general.map((entry, index) => (
+                <li key={entry.arbitreId} className="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {index + 1}.{' '}
+                      {getLocalizedName(locale, {
+                        defaultValue: entry.nom,
+                        fr: entry.nom,
+                        en: entry.nom_en ?? undefined,
+                        ar: entry.nom_ar ?? undefined,
+                      })}
+                    </p>
+                    <p className="text-xs text-gray-500">{t('home.rankings.votes', { count: entry.votes })}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-semibold text-gray-900">{entry.moyenne.toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">{t('common.globalNote')}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
 
       {refereeRanking.length > 0 && (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">

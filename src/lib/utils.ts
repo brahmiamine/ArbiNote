@@ -40,6 +40,19 @@ export function formatDateShort(date: Date | string, locale: string = 'fr'): str
 }
 
 /**
+ * Formate une date sans l'heure (jour/mois/année)
+ */
+export function formatDateOnly(date: Date | string, locale: string = 'fr'): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  const intlLocale = resolveIntlLocale(locale)
+  return new Intl.DateTimeFormat(intlLocale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(d)
+}
+
+/**
  * Calcule la moyenne d'un tableau de nombres
  */
 export function calculateAverage(numbers: number[]): number {

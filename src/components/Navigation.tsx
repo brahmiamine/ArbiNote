@@ -19,11 +19,17 @@ export default function Navigation() {
             <Link href="/saisons" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
               {t("nav.seasons")}
             </Link>
-            <Link href="/matches" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-              {t("nav.matches")}
+            <Link href="/journees" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+              {t("nav.matchday")}
             </Link>
             <Link href="/classement" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
               {t("nav.rankings")}
+            </Link>
+            <Link href="/archive" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+              {t("nav.archive")}
+            </Link>
+            <Link href="/mes-votes" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+              {t("nav.myVotes")}
             </Link>
             <Link href="/admin" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
               Admin

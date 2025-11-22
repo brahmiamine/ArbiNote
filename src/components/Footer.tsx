@@ -94,6 +94,13 @@ export default function Footer() {
                 >
                   {t("common.legalNotice")}
                 </Link>
+                <span className="text-gray-400 dark:text-gray-500">•</span>
+                <Link
+                  href="/contact"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >
+                  {t("common.contact")}
+                </Link>
               </div>
             </div>
           </div>

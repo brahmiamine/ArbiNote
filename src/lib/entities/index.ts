@@ -7,5 +7,6 @@ export { Team } from './Team'
 export { Match } from './Match'
 export { Vote } from './Vote'
 export { CritereDefinitionEntity } from './CritereDefinition'
+export { Contact } from './Contact'
 
 

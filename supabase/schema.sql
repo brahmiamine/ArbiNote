@@ -5,6 +5,8 @@ SET NAMES utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS contact_messages;
+
 DROP TABLE IF EXISTS votes;
 
 DROP TABLE IF EXISTS critere_definitions;
@@ -156,3 +158,20 @@ CREATE INDEX idx_votes_arbitre_id ON votes (arbitre_id);
 CREATE INDEX idx_votes_created_at ON votes (created_at);
 
 CREATE INDEX idx_journees_saison ON journees (saison_id, numero);
+
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id CHAR(36) NOT NULL DEFAULT(UUID()),
+    email VARCHAR(255) NOT NULL,
+    subject VARCHAR(500) NOT NULL,
+    message TEXT NOT NULL,
+    device_fingerprint VARCHAR(255),
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+CREATE INDEX idx_contact_messages_created_at ON contact_messages (created_at);
+
+CREATE INDEX idx_contact_messages_fingerprint_date ON contact_messages (
+    device_fingerprint,
+    created_at
+);

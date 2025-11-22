@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Journées', href: '/admin/journees' },
   { label: 'Matchs', href: '/admin/matches' },
   { label: 'Critères', href: '/admin/criteres' },
+  { label: 'Messages', href: '/admin/contact' },
 ]
 
 export default function AdminSidebar() {

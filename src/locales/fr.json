@@ -75,6 +75,7 @@
   "common.privacyPolicy": "Politique de confidentialité",
   "common.termsOfService": "Conditions d'utilisation",
   "common.legalNotice": "Mentions légales",
+  "common.contact": "Contact",
   "common.noRefereeAssigned": "Aucun arbitre assigné à ce match. Impossible de voter.",
   "common.vote": "vote",
   "common.votes": "votes",
@@ -407,5 +408,22 @@
   "cookies.section5.paragraph1": "Pour toute question concernant notre utilisation des cookies, vous pouvez nous contacter :",
   "cookies.section5.contact.title": "Contact :",
   "cookies.section5.contact.email": "Pour toute demande relative à notre politique cookies, veuillez contacter l'administrateur de la plateforme via le formulaire de contact disponible sur le site.",
-  "cookies.footer": "Pour en savoir plus sur la gestion de vos données personnelles, consultez notre Politique de Confidentialité."
+  "cookies.footer": "Pour en savoir plus sur la gestion de vos données personnelles, consultez notre Politique de Confidentialité.",
+
+  "contact.title": "Contactez-nous",
+  "contact.subtitle": "Pour toute question, suggestion ou demande, n'hésitez pas à nous contacter.",
+  "contact.form.email": "Email",
+  "contact.form.emailPlaceholder": "votre@email.com",
+  "contact.form.subject": "Sujet",
+  "contact.form.subjectPlaceholder": "Objet de votre message",
+  "contact.form.message": "Message",
+  "contact.form.messagePlaceholder": "Votre message...",
+  "contact.form.submit": "Envoyer le message",
+  "contact.form.submitting": "Envoi en cours...",
+  "contact.form.success": "✅ Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.",
+  "contact.form.error": "Une erreur s'est produite lors de l'envoi de votre message. Veuillez réessayer.",
+  "contact.form.characters": "caractères",
+  "contact.form.alreadySentToday": "⚠️ Vous avez déjà envoyé un message aujourd'hui. Vous ne pouvez envoyer qu'un seul message par jour.",
+  "contact.form.loadingFingerprint": "Chargement de l'identifiant...",
+  "contact.previousMessages": "Mes messages précédents"
 }

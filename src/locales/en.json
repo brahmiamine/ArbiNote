@@ -75,6 +75,7 @@
   "common.privacyPolicy": "Privacy Policy",
   "common.termsOfService": "Terms of Service",
   "common.legalNotice": "Legal Notice",
+  "common.contact": "Contact",
   "common.noRefereeAssigned": "No referee assigned to this match. Voting is disabled.",
   "common.vote": "vote",
   "common.votes": "votes",
@@ -407,5 +408,22 @@
   "cookies.section5.paragraph1": "For any questions regarding our use of cookies, you can contact us:",
   "cookies.section5.contact.title": "Contact:",
   "cookies.section5.contact.email": "For any request regarding our cookie policy, please contact the platform administrator via the contact form available on the website.",
-  "cookies.footer": "To learn more about the management of your personal data, please consult our Privacy Policy."
+  "cookies.footer": "To learn more about the management of your personal data, please consult our Privacy Policy.",
+
+  "contact.title": "Contact Us",
+  "contact.subtitle": "For any questions, suggestions, or requests, please don't hesitate to contact us.",
+  "contact.form.email": "Email",
+  "contact.form.emailPlaceholder": "your@email.com",
+  "contact.form.subject": "Subject",
+  "contact.form.subjectPlaceholder": "Subject of your message",
+  "contact.form.message": "Message",
+  "contact.form.messagePlaceholder": "Your message...",
+  "contact.form.submit": "Send message",
+  "contact.form.submitting": "Sending...",
+  "contact.form.success": "✅ Your message has been sent successfully! We will get back to you as soon as possible.",
+  "contact.form.error": "An error occurred while sending your message. Please try again.",
+  "contact.form.characters": "characters",
+  "contact.form.alreadySentToday": "⚠️ You have already sent a message today. You can only send one message per day.",
+  "contact.form.loadingFingerprint": "Loading identifier...",
+  "contact.previousMessages": "My previous messages"
 }

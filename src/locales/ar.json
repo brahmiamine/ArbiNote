@@ -75,6 +75,7 @@
   "common.privacyPolicy": "سياسة الخصوصية",
   "common.termsOfService": "الشروط والأحكام",
   "common.legalNotice": "المعلومات القانونية",
+  "common.contact": "اتصل بنا",
   "common.noRefereeAssigned": "لا يوجد حكم مكلّف بهذه المباراة، لا يمكن التصويت.",
   "common.vote": "تصويت",
   "common.votes": "تصويتات",
@@ -406,5 +407,22 @@
   "cookies.section5.paragraph1": "لأي أسئلة تتعلق باستخدامنا لملفات تعريف الارتباط، يمكنك الاتصال بنا:",
   "cookies.section5.contact.title": "الاتصال:",
   "cookies.section5.contact.email": "لأي طلب يتعلق بسياسة ملفات تعريف الارتباط الخاصة بنا، يرجى الاتصال بمسؤول المنصة عبر نموذج الاتصال المتاح على الموقع.",
-  "cookies.footer": "لمعرفة المزيد حول إدارة بياناتك الشخصية، يرجى استشارة سياسة الخصوصية الخاصة بنا."
+  "cookies.footer": "لمعرفة المزيد حول إدارة بياناتك الشخصية، يرجى استشارة سياسة الخصوصية الخاصة بنا.",
+
+  "contact.title": "اتصل بنا",
+  "contact.subtitle": "لأي أسئلة أو اقتراحات أو طلبات، لا تتردد في الاتصال بنا.",
+  "contact.form.email": "البريد الإلكتروني",
+  "contact.form.emailPlaceholder": "your@email.com",
+  "contact.form.subject": "الموضوع",
+  "contact.form.subjectPlaceholder": "موضوع رسالتك",
+  "contact.form.message": "الرسالة",
+  "contact.form.messagePlaceholder": "رسالتك...",
+  "contact.form.submit": "إرسال الرسالة",
+  "contact.form.submitting": "جاري الإرسال...",
+  "contact.form.success": "✅ تم إرسال رسالتك بنجاح! سنعود إليك في أقرب وقت ممكن.",
+  "contact.form.error": "حدث خطأ أثناء إرسال رسالتك. يرجى المحاولة مرة أخرى.",
+  "contact.form.characters": "حرف",
+  "contact.form.alreadySentToday": "⚠️ لقد أرسلت بالفعل رسالة اليوم. يمكنك إرسال رسالة واحدة فقط في اليوم.",
+  "contact.form.loadingFingerprint": "جاري تحميل المعرف...",
+  "contact.previousMessages": "رسائلي السابقة"
 }

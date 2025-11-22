@@ -47,35 +47,41 @@ export default async function TopMatchesList({ matchIds, category, locale, t }: 
           match.score_away !== undefined
 
         return (
-          <li key={match.id} className="rounded-2xl border border-slate-100 px-4 py-3 hover:border-blue-200 transition">
+          <li key={match.id} className="rounded-xl sm:rounded-2xl border border-slate-100 dark:border-slate-700 px-3 sm:px-4 py-2 sm:py-3 hover:border-blue-200 dark:hover:border-blue-700 transition bg-white dark:bg-gray-800">
             <Link href={`/matches/${match.id}`} className="block">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-blue-600">#{index + 1}</span>
+              <div className="flex items-center justify-between mb-2 gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 shrink-0">#{index + 1}</span>
                   {journee && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 shrink-0">
                       {t('common.matchday')} {journee.numero}
                     </span>
                   )}
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-semibold text-gray-900">{item.average.toFixed(2)}</p>
-                  <p className="text-xs text-gray-500">{t('common.globalNote')}</p>
+                <div className="text-right shrink-0 ml-2">
+                  <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">{item.average.toFixed(2)}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('common.globalNote')}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-2 text-sm">
-                <span className="font-semibold text-gray-900 truncate flex-1">{homeName}</span>
-                <span className="text-gray-600">
-                  {hasScore ? `${match.score_home} - ${match.score_away}` : 'VS'}
-                </span>
-                <span className="font-semibold text-gray-900 truncate flex-1 text-right">{awayName}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-2">
+                <div className="flex-1 min-w-0">
+                  <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white break-words line-clamp-2">{homeName}</span>
+                </div>
+                <div className="shrink-0 text-center">
+                  <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+                    {hasScore ? `${match.score_home} - ${match.score_away}` : 'VS'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0 text-right sm:text-left">
+                  <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white break-words line-clamp-2">{awayName}</span>
+                </div>
               </div>
               {match.date && (
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {formatDateOnly(match.date, locale)}
                 </p>
               )}
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 mt-1">
                 {t('classement.voteCount', { count: item.voteCount })}
               </p>
             </Link>
@@ -85,4 +91,5 @@ export default async function TopMatchesList({ matchIds, category, locale, t }: 
     </ul>
   )
 }
+
 

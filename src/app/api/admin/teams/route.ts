@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { ensureAdminAuth } from '@/lib/adminAuth'
 import { fetchTeams } from '@/lib/dataAccess'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const unauthorized = ensureAdminAuth(request)
   if (unauthorized) return unauthorized
 

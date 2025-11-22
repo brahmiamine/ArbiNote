@@ -271,6 +271,184 @@ export async function fetchNextJourneeMatches(referenceDate: Date = new Date(), 
   }
 }
 
+export async function fetchUpcomingMatches(referenceDate: Date = new Date(), leagueId?: string | null) {
+  const dataSource = await getDataSource()
+  const matchRepo = dataSource.getRepository<Match>('matches')
+  const journeeRepo = dataSource.getRepository<Journee>('journees')
+  const today = referenceDate.toISOString().slice(0, 10)
+  
+  // Récupérer toutes les journées à venir
+  const baseJourneeQuery = journeeRepo
+    .createQueryBuilder('j')
+    .leftJoinAndSelect('j.saison', 'saison')
+    .where('j.date_journee IS NOT NULL')
+    .andWhere('j.date_journee >= :today', { today })
+    .orderBy('j.date_journee', 'ASC')
+
+  if (leagueId) {
+    baseJourneeQuery.andWhere('saison.league_id = :leagueId', { leagueId })
+  }
+
+  const upcomingJournees = await baseJourneeQuery.getMany()
+
+  if (upcomingJournees.length === 0) {
+    return []
+  }
+
+  const journeeIds = upcomingJournees.map(j => j.id)
+  
+  // Récupérer tous les matchs de ces journées (sans condition sur la date du match)
+  const qb = matchRepo
+    .createQueryBuilder('match')
+    .leftJoinAndSelect('match.journee', 'journee')
+    .leftJoinAndSelect('journee.saison', 'saison')
+    .leftJoinAndSelect('match.equipe_home', 'equipe_home')
+    .leftJoinAndSelect('match.equipe_away', 'equipe_away')
+    .leftJoinAndSelect('match.arbitre', 'arbitre')
+    .where('match.journee_id IN (:...journeeIds)', { journeeIds })
+    .orderBy('match.date', 'ASC')
+    .addOrderBy('match.created_at', 'ASC')
+
+  const matches = await qb.getMany()
+  return toPlainArray(matches)
+}
+
+export async function fetchNextJourneeAllMatches(referenceDate: Date = new Date(), leagueId?: string | null) {
+  const dataSource = await getDataSource()
+  const journeeRepo = dataSource.getRepository<Journee>('journees')
+  const matchRepo = dataSource.getRepository<Match>('matches')
+  const today = referenceDate.toISOString().slice(0, 10)
+
+  // Si aucune ligue spécifiée, récupérer toutes les journées à venir de toutes les ligues
+  if (!leagueId) {
+    // Trouver toutes les journées à venir de toutes les ligues
+    const allUpcomingJournees = await journeeRepo
+      .createQueryBuilder('j')
+      .leftJoinAndSelect('j.saison', 'saison')
+      .where('j.date_journee IS NOT NULL')
+      .andWhere('j.date_journee >= :today', { today })
+      .orderBy('j.date_journee', 'ASC')
+      .getMany()
+
+    if (allUpcomingJournees.length === 0) {
+      // Si aucune journée à venir, prendre les dernières journées
+      const latestJournees = await journeeRepo
+        .createQueryBuilder('j')
+        .leftJoinAndSelect('j.saison', 'saison')
+        .where('j.date_journee IS NOT NULL')
+        .orderBy('j.date_journee', 'DESC')
+        .addOrderBy('j.created_at', 'DESC')
+        .getMany()
+
+      if (latestJournees.length === 0) {
+        return []
+      }
+
+      // Grouper par date_journee et prendre toutes les journées de la date la plus récente
+      const journeesByDate = new Map<string, Journee[]>()
+      for (const journee of latestJournees) {
+        const dateKey = journee.date_journee?.slice(0, 10) || ''
+        if (dateKey) {
+          const existing = journeesByDate.get(dateKey) || []
+          existing.push(journee)
+          journeesByDate.set(dateKey, existing)
+        }
+      }
+
+      const sortedDates = Array.from(journeesByDate.keys()).sort().reverse()
+      if (sortedDates.length === 0) {
+        return []
+      }
+
+      const latestDate = sortedDates[0]
+      const targetJournees = journeesByDate.get(latestDate) || []
+      const journeeIds = targetJournees.map(j => j.id)
+
+      const allMatches = await matchRepo.find({
+        where: { journee_id: In(journeeIds) },
+        relations: {
+          journee: true,
+          equipe_home: true,
+          equipe_away: true,
+          arbitre: true,
+        },
+        order: { date: 'ASC' },
+      })
+
+      return toPlainArray(allMatches)
+    }
+
+    // Grouper les journées par date_journee pour trouver toutes les journées de la date la plus proche
+    const journeesByDate = new Map<string, Journee[]>()
+    for (const journee of allUpcomingJournees) {
+      const dateKey = journee.date_journee?.slice(0, 10) || ''
+      if (dateKey) {
+        const existing = journeesByDate.get(dateKey) || []
+        existing.push(journee)
+        journeesByDate.set(dateKey, existing)
+      }
+    }
+
+    // Prendre toutes les journées de la date la plus proche
+    const sortedDates = Array.from(journeesByDate.keys()).sort()
+    if (sortedDates.length === 0) {
+      return []
+    }
+
+    const closestDate = sortedDates[0]
+    const targetJournees = journeesByDate.get(closestDate) || []
+    const journeeIds = targetJournees.map(j => j.id)
+
+    // Récupérer tous les matchs de toutes ces journées
+    const allMatches = await matchRepo.find({
+      where: { journee_id: In(journeeIds) },
+      relations: {
+        journee: true,
+        equipe_home: true,
+        equipe_away: true,
+        arbitre: true,
+      },
+      order: { date: 'ASC' },
+    })
+
+    return toPlainArray(allMatches)
+  }
+
+  // Logique pour une ligue spécifique (identique à fetchNextJourneeMatches)
+  const baseQuery = journeeRepo
+    .createQueryBuilder('j')
+    .leftJoinAndSelect('j.saison', 'saison')
+    .where('saison.league_id = :leagueId', { leagueId })
+
+  // Trouver la prochaine journée (ou la dernière si aucune à venir)
+  const nextJournee =
+    (await baseQuery
+      .clone()
+      .andWhere('j.date_journee IS NOT NULL')
+      .andWhere('j.date_journee >= :today', { today })
+      .orderBy('j.date_journee', 'ASC')
+      .getOne()) ||
+    (await baseQuery.clone().orderBy('j.date_journee', 'DESC').getOne())
+
+  if (!nextJournee) {
+    return []
+  }
+
+  // Récupérer TOUS les matchs de cette journée, sans condition sur la date du match
+  const matches = await matchRepo.find({
+    where: { journee_id: nextJournee.id },
+    relations: {
+      journee: true,
+      equipe_home: true,
+      equipe_away: true,
+      arbitre: true,
+    },
+    order: { date: 'ASC' },
+  })
+
+  return toPlainArray(matches)
+}
+
 export async function fetchFederationsWithLeagues() {
   const dataSource = await getDataSource()
   const federations = await dataSource.query(

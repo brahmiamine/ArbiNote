@@ -43,13 +43,13 @@ export default function Navigation() {
   // Fermer le dropdown mobile avec Escape key
   useEffect(() => {
     if (!mobileMenuOpen) return;
-    
+
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMobileMenuOpen(false);
       }
     };
-    
+
     document.addEventListener("keydown", handleEscape);
     return () => {
       document.removeEventListener("keydown", handleEscape);
@@ -57,9 +57,7 @@ export default function Navigation() {
   }, [mobileMenuOpen]);
 
   // Active league pour le dropdown
-  const activeLeague = federations
-    .flatMap((fed) => fed.leagues)
-    .find((league) => league.id === activeLeagueId);
+  const activeLeague = federations.flatMap((fed) => fed.leagues).find((league) => league.id === activeLeagueId);
 
   const activeLeagueLabel = activeLeague
     ? getLocalizedName(locale, {
@@ -163,111 +161,137 @@ export default function Navigation() {
               {mobileMenuOpen && (
                 <>
                   {/* Overlay invisible pour fermer le menu */}
-                  <div 
-                    className="fixed inset-0 z-[75] bg-black/20"
-                    onClick={() => setMobileMenuOpen(false)}
-                  />
-                  <div 
+                  <div className="fixed inset-0 z-[75] bg-black/20" onClick={() => setMobileMenuOpen(false)} />
+                  <div
                     className="fixed right-2 top-[3.5rem] w-64 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl z-[80] max-h-[calc(100vh-4rem)] overflow-y-auto"
                     onClick={(e) => e.stopPropagation()}
                   >
-                  {/* Ligue Section */}
-                  <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                    <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
-                      {t("federationSwitcher.title")}
-                    </p>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {federations.map((federation) => (
-                        <div key={federation.id} className="space-y-1">
-                          <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {getLocalizedName(locale, {
-                              defaultValue: federation.nom,
-                              fr: federation.nom,
-                              en: federation.nom_en ?? federation.nom,
-                              ar: federation.nom_ar ?? federation.nom,
-                            })}
-                          </p>
-                          {federation.leagues.length === 0 ? (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 px-3 py-1">
-                              {t("federationSwitcher.noLeagues")}
-                            </p>
-                          ) : (
-                            federation.leagues.map((league) => {
-                              const leagueLabel = getLocalizedName(locale, {
-                                defaultValue: league.nom,
-                                fr: league.nom,
-                                en: league.nom_en ?? league.nom,
-                                ar: league.nom_ar ?? league.nom,
-                              });
-                              const isActive = league.id === activeLeagueId;
-                              return (
-                                <button
-                                  key={league.id}
-                                  onClick={() => {
-                                    switchLeague(league.id);
-                                    setMobileMenuOpen(false);
+                    {/* Logos Section */}
+                    {(() => {
+                      const activeLeague = federations.flatMap((fed) => fed.leagues).find((league) => league.id === activeLeagueId);
+                      const activeFederation = federations.find((fed) => fed.leagues.some((league) => league.id === activeLeagueId));
+                      if (!activeFederation || !activeLeague) return null;
+                      return (
+                        <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-center gap-3">
+                            {activeFederation.logo_url && (
+                              <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 bg-white dark:bg-gray-700 rounded-lg p-1.5 border border-gray-200 dark:border-gray-600">
+                                <img
+                                  src={activeFederation.logo_url}
+                                  alt={activeFederation.nom}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = "none";
                                   }}
-                                  className={`w-full text-left px-3 py-2 rounded text-sm transition ${
-                                    isActive
-                                      ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                  }`}
-                                >
-                                  {leagueLabel}
-                                  {isActive && (
-                                    <span className="ml-2 text-xs">✓</span>
-                                  )}
-                                </button>
-                              );
-                            })
-                          )}
+                                />
+                              </div>
+                            )}
+                            {activeLeague.logo_url && (
+                              <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 bg-white dark:bg-gray-700 rounded-lg p-1.5 border border-gray-200 dark:border-gray-600">
+                                <img
+                                  src={activeLeague.logo_url}
+                                  alt={activeLeague.nom}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = "none";
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      ))}
+                      );
+                    })()}
+
+                    {/* Ligue Section */}
+                    <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                      <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">{t("federationSwitcher.title")}</p>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {federations.map((federation) => (
+                          <div key={federation.id} className="space-y-1">
+                            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                              {getLocalizedName(locale, {
+                                defaultValue: federation.nom,
+                                fr: federation.nom,
+                                en: federation.nom_en ?? federation.nom,
+                                ar: federation.nom_ar ?? federation.nom,
+                              })}
+                            </p>
+                            {federation.leagues.length === 0 ? (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 px-3 py-1">{t("federationSwitcher.noLeagues")}</p>
+                            ) : (
+                              federation.leagues.map((league) => {
+                                const leagueLabel = getLocalizedName(locale, {
+                                  defaultValue: league.nom,
+                                  fr: league.nom,
+                                  en: league.nom_en ?? league.nom,
+                                  ar: league.nom_ar ?? league.nom,
+                                });
+                                const isActive = league.id === activeLeagueId;
+                                return (
+                                  <button
+                                    key={league.id}
+                                    onClick={() => {
+                                      switchLeague(league.id);
+                                      setMobileMenuOpen(false);
+                                    }}
+                                    className={`w-full text-left px-3 py-2 rounded text-sm transition ${
+                                      isActive
+                                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    }`}
+                                  >
+                                    {leagueLabel}
+                                    {isActive && <span className="ml-2 text-xs">✓</span>}
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Dark Mode Section */}
+                    <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                      <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Thème</p>
+                      <button
+                        onClick={() => {
+                          toggleTheme();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        <span>{theme === "light" ? "Mode sombre" : "Mode clair"}</span>
+                        <span className="text-lg">{theme === "light" ? "🌙" : "☀️"}</span>
+                      </button>
+                    </div>
+
+                    {/* Langue Section */}
+                    <div className="p-3">
+                      <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Langue</p>
+                      <div className="space-y-1">
+                        {languages.map((lang) => (
+                          <button
+                            key={lang.code}
+                            onClick={() => {
+                              switchLocale(lang.code);
+                              setMobileMenuOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded text-sm transition ${
+                              locale === lang.code
+                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            }`}
+                          >
+                            {lang.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-
-                  {/* Dark Mode Section */}
-                  <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                    <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
-                      Thème
-                    </p>
-                    <button
-                      onClick={() => {
-                        toggleTheme();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                      <span>{theme === "light" ? "Mode sombre" : "Mode clair"}</span>
-                      <span className="text-lg">{theme === "light" ? "🌙" : "☀️"}</span>
-                    </button>
-                  </div>
-
-                  {/* Langue Section */}
-                  <div className="p-3">
-                    <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
-                      Langue
-                    </p>
-                    <div className="space-y-1">
-                      {languages.map((lang) => (
-                        <button
-                          key={lang.code}
-                          onClick={() => {
-                            switchLocale(lang.code);
-                            setMobileMenuOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded text-sm transition ${
-                            locale === lang.code
-                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          }`}
-                        >
-                          {lang.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
                 </>
               )}
             </div>
@@ -303,9 +327,7 @@ export default function Navigation() {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${
-          sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
         onClick={() => setSidebarOpen(false)}
       >
         {/* Overlay */}
@@ -363,11 +385,7 @@ export default function Navigation() {
                 >
                   <span>{link.label}</span>
                   {isActive && (
-                    <svg
-                      className="w-4 h-4 ml-auto"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
+                    <svg className="w-4 h-4 ml-auto" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"

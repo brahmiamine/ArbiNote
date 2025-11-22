@@ -142,21 +142,21 @@ export default async function ClassementPage() {
 
       {/* Aperçu basé sur les dernières notes */}
       <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.rankings.subtitle')}</p>
-              <h3 className="text-xl font-semibold text-gray-900">{t('home.rankings.referees')}</h3>
+              <p className="text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{t('home.rankings.subtitle')}</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{t('home.rankings.referees')}</h3>
             </div>
           </div>
           {rankingPreview.referees.length === 0 ? (
-            <p className="text-sm text-gray-500">{t('home.rankings.empty')}</p>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('home.rankings.empty')}</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-2 sm:space-y-3">
               {rankingPreview.referees.map((entry, index) => (
-                <li key={entry.arbitreId} className="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
+                <li key={entry.arbitreId} className="flex items-center justify-between rounded-xl sm:rounded-2xl border border-slate-100 dark:border-slate-700 px-3 sm:px-4 py-2 sm:py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">
                       {index + 1}.{' '}
                       {getLocalizedName(locale, {
                         defaultValue: entry.nom,
@@ -165,32 +165,32 @@ export default async function ClassementPage() {
                         ar: entry.nom_ar ?? undefined,
                       })}
                     </p>
-                    <p className="text-xs text-gray-500">{t('home.rankings.votes', { count: entry.votes })}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('home.rankings.votes', { count: entry.votes })}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold text-gray-900">{entry.moyenne.toFixed(2)}</p>
-                    <p className="text-xs text-gray-500">{t('common.globalNote')}</p>
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">{entry.moyenne.toFixed(2)}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('common.globalNote')}</p>
                   </div>
                 </li>
               ))}
             </ul>
           )}
         </div>
-        <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.rankings.subtitle')}</p>
-              <h3 className="text-xl font-semibold text-gray-900">{t('home.rankings.general')}</h3>
+              <p className="text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{t('home.rankings.subtitle')}</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{t('home.rankings.general')}</h3>
             </div>
           </div>
           {rankingPreview.general.length === 0 ? (
-            <p className="text-sm text-gray-500">{t('home.rankings.empty')}</p>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('home.rankings.empty')}</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-2 sm:space-y-3">
               {rankingPreview.general.map((entry, index) => (
-                <li key={entry.arbitreId} className="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
+                <li key={entry.arbitreId} className="flex items-center justify-between rounded-xl sm:rounded-2xl border border-slate-100 dark:border-slate-700 px-3 sm:px-4 py-2 sm:py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">
                       {index + 1}.{' '}
                       {getLocalizedName(locale, {
                         defaultValue: entry.nom,
@@ -199,11 +199,11 @@ export default async function ClassementPage() {
                         ar: entry.nom_ar ?? undefined,
                       })}
                     </p>
-                    <p className="text-xs text-gray-500">{t('home.rankings.votes', { count: entry.votes })}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('home.rankings.votes', { count: entry.votes })}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold text-gray-900">{entry.moyenne.toFixed(2)}</p>
-                    <p className="text-xs text-gray-500">{t('common.globalNote')}</p>
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">{entry.moyenne.toFixed(2)}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('common.globalNote')}</p>
                   </div>
                 </li>
               ))}
@@ -249,44 +249,44 @@ export default async function ClassementPage() {
         </div>
 
         {/* Top 5 matchs VAR et Assistants */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
           {/* Top 5 matchs VAR */}
-          <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm">
-            <div className="mb-4">
-              <p className="text-xs uppercase tracking-wide text-gray-400">{t('classement.topMatchesSubtitle')}</p>
-              <h3 className="text-xl font-semibold text-gray-900">{t('classement.topVarMatches')}</h3>
+          <div className="rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 shadow-sm">
+            <div className="mb-3 sm:mb-4">
+              <p className="text-[10px] sm:text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{t('classement.topMatchesSubtitle')}</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{t('classement.topVarMatches')}</h3>
             </div>
             <TopMatchesList matchIds={matchIds} category="var" locale={locale} t={t} />
           </div>
 
           {/* Top 5 matchs Assistants */}
-          <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm">
-            <div className="mb-4">
-              <p className="text-xs uppercase tracking-wide text-gray-400">{t('classement.topMatchesSubtitle')}</p>
-              <h3 className="text-xl font-semibold text-gray-900">{t('classement.topAssistantMatches')}</h3>
+          <div className="rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 shadow-sm">
+            <div className="mb-3 sm:mb-4">
+              <p className="text-[10px] sm:text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{t('classement.topMatchesSubtitle')}</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{t('classement.topAssistantMatches')}</h3>
             </div>
             <TopMatchesList matchIds={matchIds} category="assistant" locale={locale} t={t} />
           </div>
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-2xl font-semibold">{t('classement.bestByJournee')}</h2>
+      <section className="space-y-2 sm:space-y-3">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">{t('classement.bestByJournee')}</h2>
         {bestByJournee.length === 0 && (
-          <p className="text-gray-600 text-sm">{t('journee.noVotes')}</p>
+          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">{t('journee.noVotes')}</p>
         )}
         {bestByJournee
           .filter((item) => item.best)
           .map(({ journee, best }) => (
             <div
               key={journee.id}
-              className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg"
+              className="flex items-center justify-between p-3 sm:p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
             >
-              <div>
-                <p className="text-sm text-gray-500">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   {t('common.matchday')} {journee.numero}
                 </p>
-                <p className="text-lg font-semibold">
+                <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                   {best
                     ? getLocalizedName(locale, {
                         defaultValue: best.nom,
@@ -298,7 +298,7 @@ export default async function ClassementPage() {
                 </p>
               </div>
               {best && (
-                <p className="text-blue-600 font-semibold">
+                <p className="text-blue-600 dark:text-blue-400 font-semibold text-sm sm:text-base shrink-0 ml-2">
                   {best.moyenne.toFixed(2)} / 5
                 </p>
               )}

@@ -107,10 +107,10 @@ export async function updateMatchAdmin(id: string, payload: MatchUpdateInput, le
   }
   // Mettre à jour les équipes
   if (payload.equipe_home !== undefined) {
-    updateData.equipe_home_id = payload.equipe_home === null || payload.equipe_home === '' ? null : payload.equipe_home
+    updateData.equipe_home_id = payload.equipe_home === null || payload.equipe_home === '' ? undefined : payload.equipe_home
   }
   if (payload.equipe_away !== undefined) {
-    updateData.equipe_away_id = payload.equipe_away === null || payload.equipe_away === '' ? null : payload.equipe_away
+    updateData.equipe_away_id = payload.equipe_away === null || payload.equipe_away === '' ? undefined : payload.equipe_away
   }
 
   // Mettre à jour directement dans la base de données

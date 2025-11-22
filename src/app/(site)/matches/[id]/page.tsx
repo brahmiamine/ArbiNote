@@ -87,35 +87,35 @@ export default async function MatchDetailPage({
       : null
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 overflow-x-hidden">
       <Link
         href="/matches"
-        className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-3 sm:mb-4 inline-block text-xs sm:text-sm"
       >
         {t('common.backToMatches')}
       </Link>
 
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden mb-6">
-        <div className="p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden mb-4 sm:mb-6 w-full">
+        <div className="p-2 sm:p-4 md:p-6 w-full max-w-full overflow-x-hidden">
           {/* Header avec date et journée */}
-          <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 pb-2 sm:pb-4 border-b border-gray-100 dark:border-gray-700 gap-1.5 sm:gap-2 w-full">
+            <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap min-w-0 w-full">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 shrink-0">
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>{match.date ? formatDate(match.date, locale) : t('common.datePending')}</span>
+                <span className="break-words">{match.date ? formatDate(match.date, locale) : t('common.datePending')}</span>
               </div>
               {journeeLabel && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 shrink-0">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
-                  <span>{t('matchCard.matchday')} {journeeLabel}</span>
+                  <span className="break-words">{t('matchCard.matchday')} {journeeLabel}</span>
                 </div>
               )}
               {saisonLabel && (
-                <div className="text-sm text-gray-600">
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words shrink-0">
                   {saisonLabel}
                 </div>
               )}
@@ -123,94 +123,99 @@ export default async function MatchDetailPage({
           </div>
 
           {/* Équipes et score */}
-          <div className="flex items-center justify-between mb-6">
-            {/* Équipe domicile */}
-            <div className="flex-1 flex items-center gap-4">
-              {match.equipe_home.logo_url ? (
-                <div className="relative w-16 h-16 flex-shrink-0">
-                  <Image
-                    src={match.equipe_home.logo_url}
-                    alt={`Logo ${homeName}`}
-                    fill
-                    sizes="64px"
-                    className="object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-gray-400 font-bold text-lg">
-                    {(match.equipe_home.abbr || homeName).charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-              <div className="flex-1">
-                <div className="font-bold text-xl text-gray-900">{homeName}</div>
-                {homeCity && <div className="text-xs text-gray-500 mt-1">{homeCity}</div>}
-              </div>
-            </div>
-
-            {/* Score */}
-            <div className="mx-6 flex-shrink-0">
-              {typeof match.score_home === 'number' && typeof match.score_away === 'number' ? (
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900 mb-1">
-                    {match.score_home} - {match.score_away}
+          <div className="mb-3 sm:mb-6 w-full">
+            {/* Layout mobile: vertical, desktop: horizontal */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 w-full">
+              {/* Équipe domicile */}
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-full sm:w-auto sm:flex-1">
+                {match.equipe_home.logo_url ? (
+                  <div className="relative w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 shrink-0">
+                    <Image
+                      src={match.equipe_home.logo_url}
+                      alt={`Logo ${homeName}`}
+                      fill
+                      sizes="(max-width: 640px) 40px, (max-width: 768px) 56px, 64px"
+                      className="object-contain"
+                    />
                   </div>
-                  <div className="text-xs text-gray-500 uppercase tracking-wide">{t('matchCard.score')}</div>
+                ) : (
+                  <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    <span className="text-gray-400 dark:text-gray-400 font-bold text-xs sm:text-base md:text-lg">
+                      {(match.equipe_home.abbr || homeName).charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="font-bold text-sm sm:text-lg md:text-xl text-gray-900 dark:text-white break-words">{homeName}</div>
+                  {homeCity && <div className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 break-words">{homeCity}</div>}
                 </div>
-              ) : (
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-400 mb-1">VS</div>
-                  <div className="text-xs text-gray-400">{t('common.datePending')}</div>
-                </div>
-              )}
-            </div>
-
-            {/* Équipe extérieure */}
-            <div className="flex-1 flex items-center gap-4 justify-end text-right">
-              <div className="flex-1">
-                <div className="font-bold text-xl text-gray-900">{awayName}</div>
-                {awayCity && <div className="text-xs text-gray-500 mt-1">{awayCity}</div>}
               </div>
-              {match.equipe_away.logo_url ? (
-                <div className="relative w-16 h-16 flex-shrink-0">
-                  <Image
-                    src={match.equipe_away.logo_url}
-                    alt={`Logo ${awayName}`}
-                    fill
-                    sizes="64px"
-                    className="object-contain"
-                  />
+
+              {/* Score - Centré sur mobile, entre les équipes sur desktop */}
+              <div className="mx-auto sm:mx-4 shrink-0 self-center">
+                {typeof match.score_home === 'number' && typeof match.score_away === 'number' ? (
+                  <div className="text-center">
+                    <div className="text-xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
+                      {match.score_home} - {match.score_away}
+                    </div>
+                    <div className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t('matchCard.score')}</div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-400 dark:text-gray-500 mb-0.5 sm:mb-1">VS</div>
+                    <div className="text-[10px] sm:text-sm text-gray-400 dark:text-gray-500">{t('common.datePending')}</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Équipe extérieure */}
+              <div className="flex items-center gap-2 sm:gap-3 justify-start sm:justify-end text-left sm:text-right min-w-0 w-full sm:w-auto sm:flex-1 sm:flex-row-reverse">
+                <div className="flex-1 min-w-0 overflow-hidden text-left sm:text-right">
+                  <div className="font-bold text-sm sm:text-lg md:text-xl text-gray-900 dark:text-white break-words">{awayName}</div>
+                  {awayCity && <div className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 break-words">{awayCity}</div>}
                 </div>
-              ) : (
-                <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-gray-400 font-bold text-lg">
-                    {(match.equipe_away.abbr || awayName).charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+                {match.equipe_away.logo_url ? (
+                  <div className="relative w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 shrink-0">
+                    <Image
+                      src={match.equipe_away.logo_url}
+                      alt={`Logo ${awayName}`}
+                      fill
+                      sizes="(max-width: 640px) 40px, (max-width: 768px) 56px, 64px"
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    <span className="text-gray-400 dark:text-gray-400 font-bold text-xs sm:text-base md:text-lg">
+                      {(match.equipe_away.abbr || awayName).charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Footer avec stade et arbitre */}
-          <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-4">
-            <div className="flex-1 flex items-center gap-4 text-sm text-gray-600">
+          <div className="pt-2 sm:pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 w-full">
+            <div className="flex-1 flex items-center gap-1.5 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 min-w-0 w-full sm:w-auto">
               {match.equipe_home.stadium && (
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  <span className="truncate">{match.equipe_home.stadium}</span>
+                  <span className="truncate break-words">{match.equipe_home.stadium}</span>
                 </div>
               )}
             </div>
             {arbitre && typeof arbitre === 'object' && refereeName && (
-              <ArbitreLink
-                arbitreId={arbitre.id}
-                photoUrl={arbitre.photo_url || null}
-                name={refereeName}
-                category={refereeCategory || null}
-              />
+              <div className="shrink-0 w-full sm:w-auto">
+                <ArbitreLink
+                  arbitreId={arbitre.id}
+                  photoUrl={arbitre.photo_url || null}
+                  name={refereeName}
+                  category={refereeCategory || null}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -237,16 +242,16 @@ export default async function MatchDetailPage({
       )}
 
       {(!arbitre || typeof arbitre !== 'object') && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <p className="text-yellow-800">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <p className="text-yellow-800 dark:text-yellow-200 text-sm sm:text-base break-words">
             {t('matchDetail.noReferee')}
           </p>
         </div>
       )}
 
       {arbitre && typeof arbitre === 'object' && !canVoteMatch(match as any) && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <p className="text-yellow-800">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <p className="text-yellow-800 dark:text-yellow-200 text-sm sm:text-base break-words">
             {t('matchDetail.cannotVote')}
           </p>
         </div>

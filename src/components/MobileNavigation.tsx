@@ -23,26 +23,6 @@ export default function MobileNavigation() {
 
   const navItems = [
     {
-      href: "/matches",
-      label: t("nav.matches"),
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M6 6V4.5A2.5 2.5 0 018.5 2h7A2.5 2.5 0 0118 4.5V6m0 0v1.5a2.5 2.5 0 01-2.5 2.5h-7A2.5 2.5 0 017.5 7.5V6M6 6h12M6 6H4.5A2.5 2.5 0 002 8.5v9A2.5 2.5 0 004.5 20h15a2.5 2.5 0 002.5-2.5v-9A2.5 2.5 0 0019.5 6H18m-6 6h.008v.008H12V12zm3 0h.008v.008H15V12zm3 0h.008v.008H18V12z"
-          />
-        </svg>
-      ),
-    },
-    {
       href: "/mes-votes",
       label: t("nav.myVotes"),
       icon: (
@@ -58,6 +38,26 @@ export default function MobileNavigation() {
             strokeLinecap="round"
             strokeLinejoin="round"
             d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"
+          />
+        </svg>
+      ),
+    },
+    {
+      href: "/matches",
+      label: t("nav.matches"),
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-5 h-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 6V4.5A2.5 2.5 0 018.5 2h7A2.5 2.5 0 0118 4.5V6m0 0v1.5a2.5 2.5 0 01-2.5 2.5h-7A2.5 2.5 0 017.5 7.5V6M6 6h12M6 6H4.5A2.5 2.5 0 002 8.5v9A2.5 2.5 0 004.5 20h15a2.5 2.5 0 002.5-2.5v-9A2.5 2.5 0 0019.5 6H18m-6 6h.008v.008H12V12zm3 0h.008v.008H15V12zm3 0h.008v.008H18V12z"
           />
         </svg>
       ),

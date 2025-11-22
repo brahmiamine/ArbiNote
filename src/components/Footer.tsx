@@ -71,7 +71,7 @@ export default function Footer() {
           <div className="pt-8 border-t border-gray-200 dark:border-gray-800">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
               <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-                © {new Date().getFullYear()} ArbiNote. {t("common.allRightsReserved")}
+                © {new Date().getFullYear()} ARBINOTE. {t("common.allRightsReserved")}
               </p>
               <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center">
                 <Link
@@ -95,10 +95,7 @@ export default function Footer() {
                   {t("common.legalNotice")}
                 </Link>
                 <span className="text-gray-400 dark:text-gray-500">•</span>
-                <Link
-                  href="/contact"
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
-                >
+                <Link href="/contact" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">
                   {t("common.contact")}
                 </Link>
               </div>

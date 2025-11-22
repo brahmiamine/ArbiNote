@@ -1,4 +1,4 @@
--- Schema SQL MySQL pour ArbiNote
+-- Schema SQL MySQL pour ARBINOTE
 -- À exécuter sur votre instance MySQL locale
 
 SET NAMES utf8mb4;

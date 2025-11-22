@@ -1,5 +1,5 @@
 /**
- * Types TypeScript pour l'application ArbiNote
+ * Types TypeScript pour l'application ARBINOTE
  */
 
 export interface Arbitre {

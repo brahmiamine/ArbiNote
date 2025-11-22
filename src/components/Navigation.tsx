@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations, Locale } from "@/lib/i18n";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -125,11 +126,9 @@ export default function Navigation() {
             </button>
 
             {/* Logo au centre (flex-1 pour prendre l'espace restant) */}
-            <Link
-              href="/"
-              className="flex-1 text-center text-lg font-bold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-            >
-              ArbiNote ⚽
+            <Link href="/" className="flex-1 flex justify-center items-center h-full">
+              <Image src="/logo-light.png" alt="ARBINOTE" width={160} height={40} className="h-8 w-auto dark:hidden object-contain" priority />
+              <Image src="/logo-dark.png" alt="ARBINOTE" width={160} height={40} className="h-8 w-auto hidden dark:block object-contain" priority />
             </Link>
 
             {/* Dropdown menu à droite */}
@@ -303,11 +302,9 @@ export default function Navigation() {
 
           {/* Desktop Header */}
           <div className="hidden md:flex items-center justify-between gap-4 h-16">
-            <Link
-              href="/"
-              className="text-xl font-bold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
-            >
-              ArbiNote ⚽
+            <Link href="/" className="flex items-center shrink-0">
+              <Image src="/logo-light.png" alt="ARBINOTE" width={180} height={48} className="h-10 w-auto dark:hidden object-contain" priority />
+              <Image src="/logo-dark.png" alt="ARBINOTE" width={180} height={48} className="h-10 w-auto hidden dark:block object-contain" priority />
             </Link>
             <div className="flex flex-1 justify-center gap-6 text-sm md:text-base">
               {navLinks.map((link) => (
@@ -346,12 +343,9 @@ export default function Navigation() {
         >
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
-            <Link
-              href="/"
-              className="text-lg font-bold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-              onClick={() => setSidebarOpen(false)}
-            >
-              ArbiNote ⚽
+            <Link href="/" className="flex items-center" onClick={() => setSidebarOpen(false)}>
+              <Image src="/logo-light.png" alt="ARBINOTE" width={160} height={40} className="h-9 w-auto dark:hidden object-contain" priority />
+              <Image src="/logo-dark.png" alt="ARBINOTE" width={160} height={40} className="h-9 w-auto hidden dark:block object-contain" priority />
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}

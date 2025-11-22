@@ -16,7 +16,7 @@ export default async function Home() {
   try {
     const result = await fetchNextJourneeMatches(new Date(), leagueId ?? undefined);
     matches = result ? (result.matches as Match[]) : [];
-    
+
     // Trier les matches par date et heure croissante
     matches.sort((a, b) => {
       if (!a.date && !b.date) return 0;
@@ -48,11 +48,8 @@ export default async function Home() {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4">
-      {/* Logo ArbiNote */}
+      {/* Logo ARBINOTE */}
       <div className="text-center mb-6 sm:mb-8">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-600 bg-clip-text text-transparent">
-          ArbiNote
-        </h1>
         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           {t("home.subtitle") ||
             "Plateforme de référence pour noter et comparer les arbitres de Ligue 1 tunisienne : calendrier, classements et votes en direct."}
@@ -118,74 +115,76 @@ export default async function Home() {
         </div>
       )}
 
-      {!error && matches.length > 0 && (() => {
-        // Grouper les matches par date
-        const matchesByDate = matches.reduce((acc, match) => {
-          if (!match.date) {
-            const key = "unknown";
-            if (!acc[key]) acc[key] = [];
-            acc[key].push(match);
+      {!error &&
+        matches.length > 0 &&
+        (() => {
+          // Grouper les matches par date
+          const matchesByDate = matches.reduce((acc, match) => {
+            if (!match.date) {
+              const key = "unknown";
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(match);
+              return acc;
+            }
+
+            const matchDate = typeof match.date === "string" ? new Date(match.date) : match.date;
+            const dateKey = formatDateOnly(matchDate, locale);
+
+            if (!acc[dateKey]) acc[dateKey] = [];
+            acc[dateKey].push(match);
             return acc;
-          }
-          
-          const matchDate = typeof match.date === "string" ? new Date(match.date) : match.date;
-          const dateKey = formatDateOnly(matchDate, locale);
-          
-          if (!acc[dateKey]) acc[dateKey] = [];
-          acc[dateKey].push(match);
-          return acc;
-        }, {} as Record<string, Match[]>);
+          }, {} as Record<string, Match[]>);
 
-        // Trier les dates (ordre croissant)
-        const sortedDates = Object.keys(matchesByDate).sort((a, b) => {
-          if (a === "unknown") return 1;
-          if (b === "unknown") return -1;
-          
-          // Extraire la première date de chaque groupe pour le tri
-          const firstMatchA = matchesByDate[a][0];
-          const firstMatchB = matchesByDate[b][0];
-          
-          if (!firstMatchA?.date || !firstMatchB?.date) {
-            if (!firstMatchA?.date) return 1;
-            if (!firstMatchB?.date) return -1;
-            return 0;
-          }
-          
-          const dateA = typeof firstMatchA.date === "string" ? new Date(firstMatchA.date) : firstMatchA.date;
-          const dateB = typeof firstMatchB.date === "string" ? new Date(firstMatchB.date) : firstMatchB.date;
-          return dateA.getTime() - dateB.getTime();
-        });
+          // Trier les dates (ordre croissant)
+          const sortedDates = Object.keys(matchesByDate).sort((a, b) => {
+            if (a === "unknown") return 1;
+            if (b === "unknown") return -1;
 
-        return (
-          <div className="space-y-6 sm:space-y-8">
-            {sortedDates.map((dateKey) => {
-              const dateMatches = matchesByDate[dateKey];
-              return (
-                <div key={dateKey} className="space-y-3 sm:space-y-4">
-                  {dateKey !== "unknown" && (
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-                      {dateKey}
-                    </h3>
-                  )}
-                  {dateMatches
-                    .sort((a, b) => {
-                      // Trier par heure dans chaque groupe de date
-                      if (!a.date && !b.date) return 0;
-                      if (!a.date) return 1;
-                      if (!b.date) return -1;
-                      const dateA = typeof a.date === "string" ? new Date(a.date) : a.date;
-                      const dateB = typeof b.date === "string" ? new Date(b.date) : b.date;
-                      return dateA.getTime() - dateB.getTime();
-                    })
-                    .map((match) => (
-                      <MatchCard key={match.id} match={match} />
-                    ))}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })()}
+            // Extraire la première date de chaque groupe pour le tri
+            const firstMatchA = matchesByDate[a][0];
+            const firstMatchB = matchesByDate[b][0];
+
+            if (!firstMatchA?.date || !firstMatchB?.date) {
+              if (!firstMatchA?.date) return 1;
+              if (!firstMatchB?.date) return -1;
+              return 0;
+            }
+
+            const dateA = typeof firstMatchA.date === "string" ? new Date(firstMatchA.date) : firstMatchA.date;
+            const dateB = typeof firstMatchB.date === "string" ? new Date(firstMatchB.date) : firstMatchB.date;
+            return dateA.getTime() - dateB.getTime();
+          });
+
+          return (
+            <div className="space-y-6 sm:space-y-8">
+              {sortedDates.map((dateKey) => {
+                const dateMatches = matchesByDate[dateKey];
+                return (
+                  <div key={dateKey} className="space-y-3 sm:space-y-4">
+                    {dateKey !== "unknown" && (
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+                        {dateKey}
+                      </h3>
+                    )}
+                    {dateMatches
+                      .sort((a, b) => {
+                        // Trier par heure dans chaque groupe de date
+                        if (!a.date && !b.date) return 0;
+                        if (!a.date) return 1;
+                        if (!b.date) return -1;
+                        const dateA = typeof a.date === "string" ? new Date(a.date) : a.date;
+                        const dateB = typeof b.date === "string" ? new Date(b.date) : b.date;
+                        return dateA.getTime() - dateB.getTime();
+                      })
+                      .map((match) => (
+                        <MatchCard key={match.id} match={match} />
+                      ))}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
     </div>
   );
 }

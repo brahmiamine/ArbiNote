@@ -1,5 +1,5 @@
 /**
- * Utilitaires pour l'application ArbiNote
+ * Utilitaires pour l'application ARBINOTE
  */
 
 /**

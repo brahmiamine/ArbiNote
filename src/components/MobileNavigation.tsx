@@ -12,8 +12,8 @@ export default function MobileNavigation() {
     if (path === "/mes-votes") {
       return pathname === "/mes-votes";
     }
-    if (path === "/matches") {
-      return pathname.startsWith("/matches") || pathname.startsWith("/journees");
+    if (path === "/") {
+      return pathname === "/" || pathname.startsWith("/matches/") || pathname.startsWith("/journees");
     }
     if (path === "/classement") {
       return pathname === "/classement" || pathname.startsWith("/classement/");
@@ -26,14 +26,7 @@ export default function MobileNavigation() {
       href: "/mes-votes",
       label: t("nav.myVotes"),
       icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -43,17 +36,10 @@ export default function MobileNavigation() {
       ),
     },
     {
-      href: "/matches",
+      href: "/",
       label: t("nav.matches"),
       icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -66,14 +52,7 @@ export default function MobileNavigation() {
       href: "/classement",
       label: t("nav.rankings"),
       icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -94,16 +73,10 @@ export default function MobileNavigation() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors px-1 ${
-                active
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 dark:text-gray-400"
+                active ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
               }`}
             >
-              <div
-                className={`flex-shrink-0 ${active ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-500"}`}
-              >
-                {item.icon}
-              </div>
+              <div className={`flex-shrink-0 ${active ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-500"}`}>{item.icon}</div>
               <span className="text-[10px] font-medium text-center leading-tight whitespace-nowrap">{item.label}</span>
             </Link>
           );
@@ -112,4 +85,3 @@ export default function MobileNavigation() {
     </nav>
   );
 }
-

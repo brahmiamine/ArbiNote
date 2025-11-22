@@ -1,56 +1,52 @@
-import Link from 'next/link'
-import Image from 'next/image'
-import { formatDateShort, getLocalizedName } from '@/lib/utils'
-import { Match } from '@/types'
-import { getServerLocale, translate } from '@/lib/i18nServer'
-import VotedBadge from './VotedBadge'
-import ArbitreLink from './ArbitreLink'
+import Link from "next/link";
+import Image from "next/image";
+import { formatDateShort, getLocalizedName } from "@/lib/utils";
+import { Match } from "@/types";
+import { getServerLocale, translate } from "@/lib/i18nServer";
+import VotedBadge from "./VotedBadge";
+import ArbitreLink from "./ArbitreLink";
 
 interface MatchCardProps {
-  match: Match
+  match: Match;
 }
 
 export default async function MatchCard({ match }: MatchCardProps) {
-  const locale = await getServerLocale()
-  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
-  const dateLabel = match.date ? formatDateShort(match.date, locale) : t('common.datePending')
-  const journeeLabel = match.journee?.numero
+  const locale = await getServerLocale();
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params);
+  const dateLabel = match.date ? formatDateShort(match.date, locale) : t("common.datePending");
+  const journeeLabel = match.journee?.numero;
   const homeName = getLocalizedName(locale, {
     defaultValue: match.equipe_home.nom,
     fr: match.equipe_home.nom,
     en: match.equipe_home.nom_en ?? undefined,
     ar: match.equipe_home.nom_ar ?? undefined,
-  })
+  });
   const awayName = getLocalizedName(locale, {
     defaultValue: match.equipe_away.nom,
     fr: match.equipe_away.nom,
     en: match.equipe_away.nom_en ?? undefined,
     ar: match.equipe_away.nom_ar ?? undefined,
-  })
-  const homeLabel = match.equipe_home.abbr || homeName
-  const awayLabel = match.equipe_away.abbr || awayName
+  });
+  const homeLabel = match.equipe_home.abbr || homeName;
+  const awayLabel = match.equipe_away.abbr || awayName;
   const homeCity =
-    match.equipe_home.city ||
-    match.equipe_home.city_ar ||
-    match.equipe_home.city_en
+    match.equipe_home.city || match.equipe_home.city_ar || match.equipe_home.city_en
       ? getLocalizedName(locale, {
-          defaultValue: match.equipe_home.city ?? match.equipe_home.city_en ?? match.equipe_home.city_ar ?? '',
+          defaultValue: match.equipe_home.city ?? match.equipe_home.city_en ?? match.equipe_home.city_ar ?? "",
           fr: match.equipe_home.city ?? undefined,
           en: match.equipe_home.city_en ?? undefined,
           ar: match.equipe_home.city_ar ?? undefined,
         })
-      : null
+      : null;
   const awayCity =
-    match.equipe_away.city ||
-    match.equipe_away.city_ar ||
-    match.equipe_away.city_en
+    match.equipe_away.city || match.equipe_away.city_ar || match.equipe_away.city_en
       ? getLocalizedName(locale, {
-          defaultValue: match.equipe_away.city ?? match.equipe_away.city_en ?? match.equipe_away.city_ar ?? '',
+          defaultValue: match.equipe_away.city ?? match.equipe_away.city_en ?? match.equipe_away.city_ar ?? "",
           fr: match.equipe_away.city ?? undefined,
           en: match.equipe_away.city_en ?? undefined,
           ar: match.equipe_away.city_ar ?? undefined,
         })
-      : null
+      : null;
   const refereeName = match.arbitre
     ? getLocalizedName(locale, {
         defaultValue: match.arbitre.nom,
@@ -58,44 +54,56 @@ export default async function MatchCard({ match }: MatchCardProps) {
         en: match.arbitre.nom_en ?? undefined,
         ar: match.arbitre.nom_ar ?? undefined,
       })
-    : null
+    : null;
   const refereeCategory =
     match.arbitre && (match.arbitre.categorie || match.arbitre.categorie_ar)
       ? getLocalizedName(locale, {
-          defaultValue: match.arbitre.categorie ?? match.arbitre.categorie_ar ?? '',
+          defaultValue: match.arbitre.categorie ?? match.arbitre.categorie_ar ?? "",
           fr: match.arbitre.categorie ?? undefined,
           ar: match.arbitre.categorie_ar ?? undefined,
         })
-      : null
+      : null;
 
-  const hasScore = typeof match.score_home === 'number' && typeof match.score_away === 'number'
+  const hasScore = typeof match.score_home === "number" && typeof match.score_away === "number";
 
   return (
     <Link
       href={`/matches/${match.id}`}
-      className="block bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden group w-full"
+      className="block rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border overflow-hidden group w-full bg-white border-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
     >
       <div className="p-3 sm:p-6">
         {/* Header avec date et journée */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-100 dark:border-gray-700 gap-2">
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
               <span>{dateLabel}</span>
             </div>
             {journeeLabel && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
                 </svg>
-                <span>{t('matchCard.matchday')} {journeeLabel}</span>
+                <span>
+                  {t("matchCard.matchday")} {journeeLabel}
+                </span>
               </div>
             )}
             <VotedBadge matchId={match.id} />
           </div>
-          <div className="hidden sm:block text-blue-600 group-hover:text-blue-700 transition-colors">
+          <div className="hidden sm:block text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -118,9 +126,7 @@ export default async function MatchCard({ match }: MatchCardProps) {
               </div>
             ) : (
               <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-gray-400 dark:text-gray-400 font-bold text-sm sm:text-lg">
-                  {homeLabel.charAt(0).toUpperCase()}
-                </span>
+                <span className="text-gray-400 dark:text-gray-400 font-bold text-sm sm:text-lg">{homeLabel.charAt(0).toUpperCase()}</span>
               </div>
             )}
             <div className="flex-1 min-w-0">
@@ -136,12 +142,12 @@ export default async function MatchCard({ match }: MatchCardProps) {
                 <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
                   {match.score_home} - {match.score_away}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t('matchCard.score')}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("matchCard.score")}</div>
               </div>
             ) : (
               <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-gray-400 mb-1">VS</div>
-                <div className="text-xs text-gray-400">{t('common.datePending')}</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-400 dark:text-gray-500 mb-1">VS</div>
+                <div className="text-xs text-gray-400 dark:text-gray-500">{t("common.datePending")}</div>
               </div>
             )}
           </div>
@@ -164,9 +170,7 @@ export default async function MatchCard({ match }: MatchCardProps) {
               </div>
             ) : (
               <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-gray-400 dark:text-gray-400 font-bold text-sm sm:text-lg">
-                  {awayLabel.charAt(0).toUpperCase()}
-                </span>
+                <span className="text-gray-400 dark:text-gray-400 font-bold text-sm sm:text-lg">{awayLabel.charAt(0).toUpperCase()}</span>
               </div>
             )}
           </div>
@@ -178,7 +182,12 @@ export default async function MatchCard({ match }: MatchCardProps) {
             {match.equipe_home.stadium && (
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
                 </svg>
                 <span className="truncate">{match.equipe_home.stadium}</span>
               </div>
@@ -195,6 +204,5 @@ export default async function MatchCard({ match }: MatchCardProps) {
         </div>
       </div>
     </Link>
-  )
+  );
 }
-

@@ -17,8 +17,7 @@ const geistMono = Geist_Mono({
 const siteName = "ArbiNote";
 const siteDescription =
   "ArbiNote est la plateforme de référence pour noter et comparer les arbitres de Ligue 1 tunisienne : calendrier, classements et votes en direct.";
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -28,14 +27,7 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   applicationName: siteName,
-  keywords: [
-    "ArbiNote",
-    "Note arbitre",
-    "Ligue 1 Tunisie",
-    "classement arbitres",
-    "notation arbitres",
-    "Supabase",
-  ],
+  keywords: ["ArbiNote", "Note arbitre", "Ligue 1 Tunisie", "classement arbitres", "notation arbitres", "Supabase"],
   authors: [{ name: siteName }],
   alternates: {
     canonical: "/",
@@ -61,14 +53,35 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const initialLocale = await getServerLocale();
-  const dir = initialLocale === 'ar' ? 'rtl' : 'ltr'
+  const dir = initialLocale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={initialLocale} dir={dir}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}>
-        <Providers initialLocale={initialLocale}>
-          {children}
-        </Providers>
+    <html lang={initialLocale} dir={dir} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('arbinote-theme');
+                  const html = document.documentElement;
+                  if (theme === 'dark') {
+                    html.classList.add('dark');
+                  } else {
+                    html.classList.remove('dark');
+                    html.style.colorScheme = 'light';
+                  }
+                } catch (e) {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.style.colorScheme = 'light';
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
+        <Providers initialLocale={initialLocale}>{children}</Providers>
       </body>
     </html>
   );

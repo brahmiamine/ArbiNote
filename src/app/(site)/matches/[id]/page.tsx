@@ -1,98 +1,92 @@
-import { notFound } from 'next/navigation'
-import VoteForm from '@/components/VoteForm'
-import AlreadyVotedSection from '@/components/AlreadyVotedSection'
-import { formatDate, getLocalizedName, canVoteMatch } from '@/lib/utils'
-import Link from 'next/link'
-import Image from 'next/image'
-import { getServerLocale, translate } from '@/lib/i18nServer'
-import { CritereDefinition } from '@/types'
-import { fetchCritereDefinitions, fetchMatchById } from '@/lib/dataAccess'
-import ArbitreLink from '@/components/ArbitreLink'
+import { notFound } from "next/navigation";
+import VoteForm from "@/components/VoteForm";
+import AlreadyVotedSection from "@/components/AlreadyVotedSection";
+import { formatDate, getLocalizedName, canVoteMatch } from "@/lib/utils";
+import Link from "next/link";
+import Image from "next/image";
+import { getServerLocale, translate } from "@/lib/i18nServer";
+import { CritereDefinition } from "@/types";
+import { fetchCritereDefinitions, fetchMatchById } from "@/lib/dataAccess";
+import ArbitreLink from "@/components/ArbitreLink";
 
 async function getMatch(id: string) {
-  return fetchMatchById(id)
+  return fetchMatchById(id);
 }
 
 async function getCriteresDefinitions(): Promise<CritereDefinition[]> {
-  const data = await fetchCritereDefinitions()
-  return data as unknown as CritereDefinition[]
+  const data = await fetchCritereDefinitions();
+  return data as unknown as CritereDefinition[];
 }
 
-export default async function MatchDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
-  const match = await getMatch(id)
-  const criteresDefinitions = await getCriteresDefinitions()
+export default async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const match = await getMatch(id);
+  const criteresDefinitions = await getCriteresDefinitions();
 
   if (!match) {
-    notFound()
+    notFound();
   }
 
-  const locale = await getServerLocale()
-  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params)
-  const arbitre = match.arbitre || null
-  const journeeLabel = match.journee?.numero
-  const saisonLabel = match.journee?.saison?.nom
+  const locale = await getServerLocale();
+  const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params);
+  const arbitre = match.arbitre || null;
+  const journeeLabel = match.journee?.numero;
+  const saisonLabel = match.journee?.saison?.nom;
   const homeName = getLocalizedName(locale, {
     defaultValue: match.equipe_home.nom,
     fr: match.equipe_home.nom,
     en: match.equipe_home.nom_en ?? undefined,
     ar: match.equipe_home.nom_ar ?? undefined,
-  })
+  });
   const awayName = getLocalizedName(locale, {
     defaultValue: match.equipe_away.nom,
     fr: match.equipe_away.nom,
     en: match.equipe_away.nom_en ?? undefined,
     ar: match.equipe_away.nom_ar ?? undefined,
-  })
+  });
   const homeCity =
     match.equipe_home.city || match.equipe_home.city_en || match.equipe_home.city_ar
       ? getLocalizedName(locale, {
-          defaultValue: match.equipe_home.city ?? match.equipe_home.city_en ?? match.equipe_home.city_ar ?? '',
+          defaultValue: match.equipe_home.city ?? match.equipe_home.city_en ?? match.equipe_home.city_ar ?? "",
           fr: match.equipe_home.city ?? undefined,
           en: match.equipe_home.city_en ?? undefined,
           ar: match.equipe_home.city_ar ?? undefined,
         })
-      : null
+      : null;
   const awayCity =
     match.equipe_away.city || match.equipe_away.city_en || match.equipe_away.city_ar
       ? getLocalizedName(locale, {
-          defaultValue: match.equipe_away.city ?? match.equipe_away.city_en ?? match.equipe_away.city_ar ?? '',
+          defaultValue: match.equipe_away.city ?? match.equipe_away.city_en ?? match.equipe_away.city_ar ?? "",
           fr: match.equipe_away.city ?? undefined,
           en: match.equipe_away.city_en ?? undefined,
           ar: match.equipe_away.city_ar ?? undefined,
         })
-      : null
+      : null;
   const refereeName =
-    arbitre && typeof arbitre === 'object'
+    arbitre && typeof arbitre === "object"
       ? getLocalizedName(locale, {
           defaultValue: arbitre.nom,
           fr: arbitre.nom,
           en: arbitre.nom_en ?? undefined,
           ar: arbitre.nom_ar ?? undefined,
         })
-      : null
+      : null;
   const refereeCategory =
-    arbitre &&
-    typeof arbitre === 'object' &&
-    ((arbitre as any).categorie || (arbitre as any).categorie_ar)
+    arbitre && typeof arbitre === "object" && ((arbitre as any).categorie || (arbitre as any).categorie_ar)
       ? getLocalizedName(locale, {
-          defaultValue: (arbitre as any).categorie ?? (arbitre as any).categorie_ar ?? '',
+          defaultValue: (arbitre as any).categorie ?? (arbitre as any).categorie_ar ?? "",
           fr: (arbitre as any).categorie ?? undefined,
           ar: (arbitre as any).categorie_ar ?? undefined,
         })
-      : null
+      : null;
 
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 overflow-x-hidden">
       <Link
-        href="/matches"
+        href="/"
         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-3 sm:mb-4 inline-block text-xs sm:text-sm"
       >
-        {t('common.backToMatches')}
+        {t("common.backToHome") || "← Retour à l'accueil"}
       </Link>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden mb-4 sm:mb-6 w-full">
@@ -102,23 +96,31 @@ export default async function MatchDetailPage({
             <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap min-w-0 w-full">
               <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 shrink-0">
                 <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
-                <span className="break-words">{match.date ? formatDate(match.date, locale) : t('common.datePending')}</span>
+                <span className="break-words">{match.date ? formatDate(match.date, locale) : t("common.datePending")}</span>
               </div>
               {journeeLabel && (
                 <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 shrink-0">
                   <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
                   </svg>
-                  <span className="break-words">{t('matchCard.matchday')} {journeeLabel}</span>
+                  <span className="break-words">
+                    {t("matchCard.matchday")} {journeeLabel}
+                  </span>
                 </div>
               )}
-              {saisonLabel && (
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words shrink-0">
-                  {saisonLabel}
-                </div>
-              )}
+              {saisonLabel && <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words shrink-0">{saisonLabel}</div>}
             </div>
           </div>
 
@@ -153,17 +155,17 @@ export default async function MatchDetailPage({
 
               {/* Score - Centré sur mobile, entre les équipes sur desktop */}
               <div className="mx-auto sm:mx-4 shrink-0 self-center">
-                {typeof match.score_home === 'number' && typeof match.score_away === 'number' ? (
+                {typeof match.score_home === "number" && typeof match.score_away === "number" ? (
                   <div className="text-center">
                     <div className="text-xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
                       {match.score_home} - {match.score_away}
                     </div>
-                    <div className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t('matchCard.score')}</div>
+                    <div className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("matchCard.score")}</div>
                   </div>
                 ) : (
                   <div className="text-center">
                     <div className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-400 dark:text-gray-500 mb-0.5 sm:mb-1">VS</div>
-                    <div className="text-[10px] sm:text-sm text-gray-400 dark:text-gray-500">{t('common.datePending')}</div>
+                    <div className="text-[10px] sm:text-sm text-gray-400 dark:text-gray-500">{t("common.datePending")}</div>
                   </div>
                 )}
               </div>
@@ -201,34 +203,34 @@ export default async function MatchDetailPage({
               {match.equipe_home.stadium && (
                 <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                   <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    />
                   </svg>
                   <span className="truncate break-words">{match.equipe_home.stadium}</span>
                 </div>
               )}
             </div>
-            {arbitre && typeof arbitre === 'object' && refereeName && (
+            {arbitre && typeof arbitre === "object" && refereeName && (
               <div className="shrink-0 w-full sm:w-auto">
-                <ArbitreLink
-                  arbitreId={arbitre.id}
-                  photoUrl={arbitre.photo_url || null}
-                  name={refereeName}
-                  category={refereeCategory || null}
-                />
+                <ArbitreLink arbitreId={arbitre.id} photoUrl={arbitre.photo_url || null} name={refereeName} category={refereeCategory || null} />
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {arbitre && typeof arbitre === 'object' && canVoteMatch(match as any) && (
+      {arbitre && typeof arbitre === "object" && canVoteMatch(match as any) && (
         <>
           <VoteForm
             matchId={match.id}
             arbitreId={arbitre.id}
             arbitreNom={refereeName ?? arbitre.nom}
             criteresDefs={criteresDefinitions}
-            matchDate={match.date ? (typeof match.date === 'string' ? match.date : match.date.toISOString()) : null}
+            matchDate={match.date ? (typeof match.date === "string" ? match.date : match.date.toISOString()) : null}
           />
           <AlreadyVotedSection
             matchId={match.id}
@@ -241,22 +243,17 @@ export default async function MatchDetailPage({
         </>
       )}
 
-      {(!arbitre || typeof arbitre !== 'object') && (
+      {(!arbitre || typeof arbitre !== "object") && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
-          <p className="text-yellow-800 dark:text-yellow-200 text-sm sm:text-base break-words">
-            {t('matchDetail.noReferee')}
-          </p>
+          <p className="text-yellow-800 dark:text-yellow-200 text-sm sm:text-base break-words">{t("matchDetail.noReferee")}</p>
         </div>
       )}
 
-      {arbitre && typeof arbitre === 'object' && !canVoteMatch(match as any) && (
+      {arbitre && typeof arbitre === "object" && !canVoteMatch(match as any) && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
-          <p className="text-yellow-800 dark:text-yellow-200 text-sm sm:text-base break-words">
-            {t('matchDetail.cannotVote')}
-          </p>
+          <p className="text-yellow-800 dark:text-yellow-200 text-sm sm:text-base break-words">{t("matchDetail.cannotVote")}</p>
         </div>
       )}
     </div>
-  )
+  );
 }
-

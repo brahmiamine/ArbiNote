@@ -1,62 +1,62 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useTranslations } from '@/lib/i18n'
-import FingerprintJS from '@fingerprintjs/fingerprintjs'
+import { useEffect, useState } from "react";
+import { useTranslations } from "@/lib/i18n";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 interface VotedBadgeProps {
-  matchId: string
+  matchId: string;
 }
 
 export default function VotedBadge({ matchId }: VotedBadgeProps) {
-  const { t } = useTranslations()
-  const [voted, setVoted] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const [fingerprint, setFingerprint] = useState<string | null>(null)
+  const { t } = useTranslations();
+  const [voted, setVoted] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [fingerprint, setFingerprint] = useState<string | null>(null);
 
   // Récupérer le fingerprint
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
     FingerprintJS.load()
       .then((fp) => fp.get())
       .then((result) => {
         if (!cancelled) {
-          setFingerprint(result.visitorId)
+          setFingerprint(result.visitorId);
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setFingerprint(null)
+          setFingerprint(null);
         }
-      })
+      });
 
     return () => {
-      cancelled = true
-    }
-  }, [])
+      cancelled = true;
+    };
+  }, []);
 
   const checkVote = async () => {
-    if (typeof window === 'undefined') return false
-    
+    if (typeof window === "undefined") return false;
+
     try {
       // 1. Vérifier localStorage
-      const stored = localStorage.getItem('note-arbitre-votes')
+      const stored = localStorage.getItem("note-arbitre-votes");
       if (stored) {
-        const votes = JSON.parse(stored)
-        
+        const votes = JSON.parse(stored);
+
         // S'assurer que votes est un tableau
         if (Array.isArray(votes)) {
           // Vérifier si le matchId est dans la liste (avec ou sans fingerprint)
-          const hasVoteLocal = votes.some(vote => {
-            if (vote === null || vote === undefined) return false
-            const voteStr = String(vote)
+          const hasVoteLocal = votes.some((vote) => {
+            if (vote === null || vote === undefined) return false;
+            const voteStr = String(vote);
             // Vérifier que voteStr est bien une string et a la méthode startsWith
-            if (typeof voteStr !== 'string') return false
-            return voteStr === matchId || (voteStr.length > matchId.length && voteStr.startsWith(`${matchId}:`))
-          })
-          
+            if (typeof voteStr !== "string") return false;
+            return voteStr === matchId || (voteStr.length > matchId.length && voteStr.startsWith(`${matchId}:`));
+          });
+
           if (hasVoteLocal) {
-            return true
+            return true;
           }
         }
       }
@@ -64,23 +64,21 @@ export default function VotedBadge({ matchId }: VotedBadgeProps) {
       // 2. Vérifier la base de données si fingerprint disponible
       if (fingerprint) {
         try {
-          const response = await fetch(`/api/votes/${matchId}`)
+          const response = await fetch(`/api/votes/${matchId}`);
           if (response.ok) {
-            const votes = await response.json()
+            const votes = await response.json();
             // Vérifier si un vote existe avec ce fingerprint
-            const hasVoteDB = Array.isArray(votes) && votes.some(
-              (vote: any) => vote.device_fingerprint === fingerprint
-            )
+            const hasVoteDB = Array.isArray(votes) && votes.some((vote: any) => vote.device_fingerprint === fingerprint);
             if (hasVoteDB) {
               // Mettre à jour localStorage pour éviter les futures requêtes
-              const stored = localStorage.getItem('note-arbitre-votes')
-              const votes = stored ? JSON.parse(stored) : []
-              const voteKey = `${matchId}:${fingerprint}`
+              const stored = localStorage.getItem("note-arbitre-votes");
+              const votes = stored ? JSON.parse(stored) : [];
+              const voteKey = `${matchId}:${fingerprint}`;
               if (!votes.includes(voteKey)) {
-                votes.push(voteKey)
-                localStorage.setItem('note-arbitre-votes', JSON.stringify(votes))
+                votes.push(voteKey);
+                localStorage.setItem("note-arbitre-votes", JSON.stringify(votes));
               }
-              return true
+              return true;
             }
           }
         } catch (error) {
@@ -88,51 +86,51 @@ export default function VotedBadge({ matchId }: VotedBadgeProps) {
         }
       }
 
-      return false
+      return false;
     } catch (error) {
-      console.error('Error checking vote:', error)
-      return false
+      console.error("Error checking vote:", error);
+      return false;
     }
-  }
+  };
 
   useEffect(() => {
     // Marquer comme monté pour éviter les problèmes d'hydratation
-    setMounted(true)
-    
+    setMounted(true);
+
     // Vérifier immédiatement
-    checkVote().then(setVoted)
+    checkVote().then(setVoted);
 
     // Écouter les changements dans localStorage
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'note-arbitre-votes') {
-        checkVote().then(setVoted)
+      if (e.key === "note-arbitre-votes") {
+        checkVote().then(setVoted);
       }
-    }
+    };
 
     // Écouter les événements de stockage (depuis d'autres onglets)
-    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener("storage", handleStorageChange);
 
     // Écouter les changements dans le même onglet via un intervalle
     const interval = setInterval(() => {
-      checkVote().then(setVoted)
-    }, 2000)
+      checkVote().then(setVoted);
+    }, 2000);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      clearInterval(interval)
-    }
-  }, [matchId, fingerprint])
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [matchId, fingerprint]);
 
   // Ne rien afficher avant le montage pour éviter les problèmes d'hydratation
-  if (!mounted) return null
-  
-  if (!voted) return null
+  if (!mounted) return null;
+
+  if (!voted) return null;
 
   return (
-    <span 
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-800 text-xs font-semibold rounded-full border-2 border-green-300 shadow-sm"
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold rounded-full border-2 border-green-300 dark:border-green-700 shadow-sm"
       onClick={(e) => e.stopPropagation()}
-      style={{ display: 'inline-flex', flexShrink: 0 }}
+      style={{ display: "inline-flex", flexShrink: 0 }}
     >
       <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
         <path
@@ -141,8 +139,7 @@ export default function VotedBadge({ matchId }: VotedBadgeProps) {
           clipRule="evenodd"
         />
       </svg>
-      <span className="whitespace-nowrap">{t('matchCard.alreadyVoted')}</span>
+      <span className="whitespace-nowrap">{t("matchCard.alreadyVoted")}</span>
     </span>
-  )
+  );
 }
-

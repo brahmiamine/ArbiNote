@@ -136,7 +136,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                 </div>
               )}
               {saisonLabel && <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words shrink-0">{saisonLabel}</div>}
-              <LiveMatchBadge matchDate={match.date} />
+              {match.date && <LiveMatchBadge matchDate={match.date} />}
             </div>
           </div>
 

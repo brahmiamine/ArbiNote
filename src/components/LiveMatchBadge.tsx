@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "@/lib/i18n";
 
 interface LiveMatchBadgeProps {
-  matchDate: string | Date | null;
+  matchDate: string | Date | null | undefined;
 }
 
 export default function LiveMatchBadge({ matchDate }: LiveMatchBadgeProps) {

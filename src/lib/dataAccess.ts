@@ -347,8 +347,8 @@ export async function fetchNextJourneeAllMatches(referenceDate: Date = new Date(
       // Grouper par date_journee et prendre toutes les journées de la date la plus récente
       const journeesByDate = new Map<string, Journee[]>()
       for (const journee of latestJournees) {
-        const dateKey = journee.date_journee?.slice(0, 10) || ''
-        if (dateKey) {
+        if (journee.date_journee) {
+          const dateKey = journee.date_journee.toISOString().slice(0, 10)
           const existing = journeesByDate.get(dateKey) || []
           existing.push(journee)
           journeesByDate.set(dateKey, existing)
@@ -381,8 +381,8 @@ export async function fetchNextJourneeAllMatches(referenceDate: Date = new Date(
     // Grouper les journées par date_journee pour trouver toutes les journées de la date la plus proche
     const journeesByDate = new Map<string, Journee[]>()
     for (const journee of allUpcomingJournees) {
-      const dateKey = journee.date_journee?.slice(0, 10) || ''
-      if (dateKey) {
+      if (journee.date_journee) {
+        const dateKey = journee.date_journee.toISOString().slice(0, 10)
         const existing = journeesByDate.get(dateKey) || []
         existing.push(journee)
         journeesByDate.set(dateKey, existing)

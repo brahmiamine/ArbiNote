@@ -208,6 +208,29 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
 
   const noteGlobale = calculateNoteGlobale(criteres);
 
+  // Calculer le temps restant avant de pouvoir voter
+  const timeUntilCanVote = useMemo(() => {
+    if (!matchDate || canVote) return null;
+    
+    try {
+      const matchStartDate = new Date(matchDate);
+      const now = new Date();
+      
+      if (matchStartDate > now) return null; // Match pas encore commencé
+      
+      const diffMs = now.getTime() - matchStartDate.getTime();
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      
+      if (diffMinutes < 30) {
+        return 30 - diffMinutes;
+      }
+    } catch {
+      return null;
+    }
+    
+    return null;
+  }, [matchDate, canVote]);
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 sm:p-6 mb-6 w-full max-w-full overflow-x-hidden">
       <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900 dark:text-white">{t("matchDetail.voteTitle")}</h2>
@@ -217,6 +240,14 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
             {t("voteForm.intro")} <strong className="font-semibold">{arbitreNom}</strong>
           </p>
         </div>
+
+        {!canVote && timeUntilCanVote !== null && (
+          <div className="p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <p className="text-yellow-800 dark:text-yellow-200 text-xs sm:text-sm">
+              {t("voteForm.waitToVote", { minutes: timeUntilCanVote }) || `Veuillez attendre encore ${timeUntilCanVote} minute(s) après le début du match avant de pouvoir voter.`}
+            </p>
+          </div>
+        )}
 
         {error && (
           <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">

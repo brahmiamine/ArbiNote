@@ -105,7 +105,8 @@ export function getLocalizedName(
  * Vérifie si un match peut être voté
  * Conditions:
  * - Le match doit avoir un arbitre attribué
- * - La date/heure du match doit être dans le passé ou égale à aujourd'hui avec l'heure déjà passée
+ * - La date/heure du match doit être dans le passé
+ * - Au moins 30 minutes doivent s'être écoulées depuis le début du match
  */
 export function canVoteMatch(match: { arbitre_id?: string | null; date?: string | null }): boolean {
   // Vérifier que l'arbitre est attribué
@@ -122,6 +123,15 @@ export function canVoteMatch(match: { arbitre_id?: string | null; date?: string 
   const now = new Date()
 
   // Vérifier que la date/heure du match est passée
-  return matchDate <= now
+  if (matchDate > now) {
+    return false
+  }
+
+  // Calculer la différence en millisecondes
+  const diffMs = now.getTime() - matchDate.getTime()
+  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+
+  // Au moins 30 minutes doivent s'être écoulées depuis le début du match
+  return diffMinutes >= 30
 }
 

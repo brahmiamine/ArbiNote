@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { formatDateShort, getLocalizedName } from "@/lib/utils";
+import { formatDate, formatDateShort, getLocalizedName } from "@/lib/utils";
 import { Match } from "@/types";
 import { getServerLocale, translate } from "@/lib/i18nServer";
 import VotedBadge from "./VotedBadge";
 import ArbitreLink from "./ArbitreLink";
+import LiveMatchBadge from "./LiveMatchBadge";
 
 interface MatchCardProps {
   match: Match;
@@ -13,7 +14,8 @@ interface MatchCardProps {
 export default async function MatchCard({ match }: MatchCardProps) {
   const locale = await getServerLocale();
   const t = (key: string, params?: Record<string, string | number>) => translate(key, locale, params);
-  const dateLabel = match.date ? formatDateShort(match.date, locale) : t("common.datePending");
+  const dateLabel = match.date ? formatDate(match.date, locale) : t("common.datePending");
+  const dateOnlyLabel = match.date ? formatDateShort(match.date, locale) : null;
   const journeeLabel = match.journee?.numero;
   const homeName = getLocalizedName(locale, {
     defaultValue: match.equipe_home.nom,
@@ -65,6 +67,20 @@ export default async function MatchCard({ match }: MatchCardProps) {
       : null;
 
   const hasScore = typeof match.score_home === "number" && typeof match.score_away === "number";
+  
+  // Vérifier si le match est en cours pour mettre le score en rouge
+  const isMatchLive = match.date && (() => {
+    try {
+      const matchDate = typeof match.date === "string" ? new Date(match.date) : match.date;
+      const now = new Date();
+      if (matchDate > now) return false;
+      const diffMs = now.getTime() - matchDate.getTime();
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      return diffMinutes >= 0 && diffMinutes <= 105; // Match en cours si moins de 105 min
+    } catch {
+      return false;
+    }
+  })();
 
   return (
     <Link
@@ -76,7 +92,7 @@ export default async function MatchCard({ match }: MatchCardProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-100 dark:border-gray-700 gap-2">
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -102,6 +118,7 @@ export default async function MatchCard({ match }: MatchCardProps) {
               </div>
             )}
             <VotedBadge matchId={match.id} />
+            <LiveMatchBadge matchDate={match.date} />
           </div>
           <div className="hidden sm:block text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -139,7 +156,7 @@ export default async function MatchCard({ match }: MatchCardProps) {
           <div className="mx-0 sm:mx-6 flex-shrink-0 self-center">
             {hasScore ? (
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                <div className={`text-2xl sm:text-3xl font-bold mb-1 ${isMatchLive ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"}`}>
                   {match.score_home} - {match.score_away}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("matchCard.score")}</div>

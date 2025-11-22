@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { formatDateShort, getLocalizedName } from "@/lib/utils";
+import { formatDate, getLocalizedName } from "@/lib/utils";
 import { Match } from "@/types";
 import { useTranslations } from "@/lib/i18n";
 import ArbitreLink from "./ArbitreLink";
 import VotedBadge from "./VotedBadge";
+import LiveMatchBadge from "./LiveMatchBadge";
 
 function TeamDisplay({ team, align = "start", locale }: { team: Match["equipe_home"]; align?: "start" | "end"; locale: string }) {
   const alignmentClasses = align === "end" ? "text-right flex-row-reverse sm:flex-row sm:text-right" : "text-left";
@@ -43,8 +44,22 @@ interface MatchCardClientProps {
 
 export default function MatchCardClient({ match }: MatchCardClientProps) {
   const { t, locale } = useTranslations();
-  const dateLabel = match.date ? formatDateShort(match.date, locale) : t("common.datePending");
+  const dateLabel = match.date ? formatDate(match.date, locale) : t("common.datePending");
   const journeeLabel = match.journee?.numero;
+  
+  // Vérifier si le match est en cours pour mettre le score en rouge
+  const isMatchLive = match.date && (() => {
+    try {
+      const matchDate = typeof match.date === "string" ? new Date(match.date) : match.date;
+      const now = new Date();
+      if (matchDate > now) return false;
+      const diffMs = now.getTime() - matchDate.getTime();
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      return diffMinutes >= 0 && diffMinutes <= 93; // Match en cours si moins de 93 min
+    } catch {
+      return false;
+    }
+  })();
   const homeName = getLocalizedName(locale, {
     defaultValue: match.equipe_home.nom,
     fr: match.equipe_home.nom,
@@ -110,13 +125,16 @@ export default function MatchCardClient({ match }: MatchCardClientProps) {
       href={`/matches/${match.id}`}
       className="block w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-3 sm:p-4 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md transition"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs uppercase text-gray-400 dark:text-gray-500 mb-2 gap-1">
-        <span>
-          {journeeLabel ? `${t("common.matchday")} ${journeeLabel}` : t("common.matchday")}
-        </span>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs uppercase text-gray-400 dark:text-gray-500 mb-2 gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span>
+            {journeeLabel ? `${t("common.matchday")} ${journeeLabel}` : t("common.matchday")}
+          </span>
           <span>{dateLabel}</span>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
           <VotedBadge matchId={match.id} />
+          <LiveMatchBadge matchDate={match.date} />
         </div>
       </div>
       <div className="flex items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-0">
@@ -126,7 +144,7 @@ export default function MatchCardClient({ match }: MatchCardClientProps) {
         <div className="text-center flex-shrink-0 px-1 sm:px-2">
           {hasScore ? (
             <>
-              <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+              <p className={`text-base sm:text-lg font-semibold ${isMatchLive ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"}`}>
                 {match.score_home} - {match.score_away}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{t("common.finished")}</p>

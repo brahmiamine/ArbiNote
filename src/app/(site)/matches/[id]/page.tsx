@@ -8,6 +8,7 @@ import { getServerLocale, translate } from "@/lib/i18nServer";
 import { CritereDefinition } from "@/types";
 import { fetchCritereDefinitions, fetchMatchById } from "@/lib/dataAccess";
 import ArbitreLink from "@/components/ArbitreLink";
+import LiveMatchBadge from "@/components/LiveMatchBadge";
 
 async function getMatch(id: string) {
   return fetchMatchById(id);
@@ -80,6 +81,20 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
         })
       : null;
 
+  // Vérifier si le match est en cours pour mettre le score en rouge
+  const isMatchLive = match.date && (() => {
+    try {
+      const matchDate = typeof match.date === "string" ? new Date(match.date) : match.date;
+      const now = new Date();
+      if (matchDate > now) return false;
+      const diffMs = now.getTime() - matchDate.getTime();
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      return diffMinutes >= 0 && diffMinutes <= 93; // Match en cours si moins de 93 min
+    } catch {
+      return false;
+    }
+  })();
+
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 overflow-x-hidden">
       <Link
@@ -121,6 +136,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                 </div>
               )}
               {saisonLabel && <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words shrink-0">{saisonLabel}</div>}
+              <LiveMatchBadge matchDate={match.date} />
             </div>
           </div>
 
@@ -157,7 +173,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
               <div className="mx-auto sm:mx-4 shrink-0 self-center">
                 {typeof match.score_home === "number" && typeof match.score_away === "number" ? (
                   <div className="text-center">
-                    <div className="text-xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
+                    <div className={`text-xl sm:text-3xl md:text-4xl font-bold mb-0.5 sm:mb-1 ${isMatchLive ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"}`}>
                       {match.score_home} - {match.score_away}
                     </div>
                     <div className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("matchCard.score")}</div>
@@ -249,11 +265,29 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
         </div>
       )}
 
-      {arbitre && typeof arbitre === "object" && !canVoteMatch(match as any) && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
-          <p className="text-yellow-800 dark:text-yellow-200 text-sm sm:text-base break-words">{t("matchDetail.cannotVote")}</p>
-        </div>
-      )}
+      {arbitre && typeof arbitre === "object" && !canVoteMatch(match as any) && (() => {
+        // Vérifier pourquoi on ne peut pas voter pour afficher un message approprié
+        const matchDate = match.date ? (typeof match.date === "string" ? new Date(match.date) : match.date) : null;
+        const now = new Date();
+        let reasonMessage = t("matchDetail.cannotVote");
+        
+        if (matchDate && matchDate > now) {
+          reasonMessage = t("matchDetail.matchNotStarted") || "Le match n'a pas encore commencé.";
+        } else if (matchDate) {
+          const diffMs = now.getTime() - matchDate.getTime();
+          const diffMinutes = Math.floor(diffMs / (1000 * 60));
+          if (diffMinutes < 30) {
+            const remainingMinutes = 30 - diffMinutes;
+            reasonMessage = t("matchDetail.waitToVote", { minutes: remainingMinutes }) || `Veuillez attendre encore ${remainingMinutes} minute(s) avant de pouvoir voter.`;
+          }
+        }
+        
+        return (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+            <p className="text-yellow-800 dark:text-yellow-200 text-sm sm:text-base break-words">{reasonMessage}</p>
+          </div>
+        );
+      })()}
     </div>
   );
 }

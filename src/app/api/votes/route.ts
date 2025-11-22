@@ -41,10 +41,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Vérifier que le match peut être voté (arbitre attribué et date/heure passée)
+    // Vérifier que le match peut être voté (arbitre attribué, match commencé et au moins 30 min écoulées)
     if (!canVoteMatch({ arbitre_id: match.arbitre_id, date: match.date?.toISOString() })) {
       return NextResponse.json(
-        { error: 'Cannot vote: match has no referee assigned or match has not started yet' },
+        { error: 'Cannot vote: match has no referee assigned, match has not started yet, or less than 30 minutes have elapsed since the match started' },
         { status: 400 }
       )
     }

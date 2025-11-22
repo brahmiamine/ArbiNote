@@ -7,37 +7,26 @@ export default function ThemeToggle() {
     if (typeof window === "undefined") {
       return "light";
     }
-    const stored = localStorage.getItem("arbinote-theme") as "light" | "dark" | null;
-    return stored ?? "light";
+    const stored = localStorage.getItem("arbinote-theme");
+    return (stored as "light" | "dark") || "light";
   });
 
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      const html = document.documentElement;
-      if (theme === "dark") {
-        html.classList.add("dark");
-        html.style.colorScheme = "dark";
-      } else {
-        html.classList.remove("dark");
-        html.style.colorScheme = "light";
-      }
+    if (typeof document === "undefined" || typeof window === "undefined") return;
+
+    const html = document.documentElement;
+    if (theme === "dark") {
+      localStorage.setItem("arbinote-theme", "dark");
+      html.classList.add("dark");
+    } else {
+      localStorage.setItem("arbinote-theme", "light");
+      html.classList.remove("dark");
     }
   }, [theme]);
 
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("arbinote-theme", nextTheme);
-      const html = document.documentElement;
-      if (nextTheme === "dark") {
-        html.classList.add("dark");
-        html.style.colorScheme = "dark";
-      } else {
-        html.classList.remove("dark");
-        html.style.colorScheme = "light";
-      }
-    }
   };
 
   return (

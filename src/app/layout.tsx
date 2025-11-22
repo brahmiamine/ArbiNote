@@ -64,17 +64,12 @@ export default async function RootLayout({
               (function() {
                 try {
                   const theme = localStorage.getItem('arbinote-theme');
-                  const html = document.documentElement;
-                  if (theme === 'dark') {
-                    html.classList.add('dark');
-                  } else {
-                    html.classList.remove('dark');
-                    html.style.colorScheme = 'light';
-                  }
-                } catch (e) {
-                  document.documentElement.classList.remove('dark');
-                  document.documentElement.style.colorScheme = 'light';
-                }
+                  document.documentElement.classList.toggle(
+                    'dark',
+                    theme === 'dark' ||
+                      (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  );
+                } catch (e) {}
               })();
             `,
           }}

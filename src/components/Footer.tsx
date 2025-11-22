@@ -41,13 +41,13 @@ export default function Footer() {
               {insightCards.map((card) => (
                 <div
                   key={card.id}
-                  className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 text-white shadow-lg"
+                  className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-5 shadow-lg"
                 >
-                  <h4 className="text-lg font-semibold">{card.title}</h4>
-                  <p className="text-sm text-slate-200 mt-2">{card.description}</p>
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{card.title}</h4>
+                  <p className="text-sm text-gray-600 dark:text-slate-200 mt-2">{card.description}</p>
                   <Link
                     href={card.href}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-200 mt-4 hover:text-white transition-colors"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-200 mt-4 hover:text-blue-700 dark:hover:text-white transition-colors"
                   >
                     {t("home.insights.read")}
                     <span aria-hidden>→</span>

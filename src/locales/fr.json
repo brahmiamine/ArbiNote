@@ -153,6 +153,11 @@
   "classement.referee": "Arbitre",
   "classement.globalNote": "Note globale",
   "classement.votesCount": "Votes",
+  "classement.topMatchesSubtitle": "Top 5 matchs",
+  "classement.topVarMatches": "Meilleure note VAR",
+  "classement.topAssistantMatches": "Meilleure note Assistants",
+  "classement.voteCount": "{{count}} vote(s)",
+  "classement.noMatchesForCategory": "Aucun match avec des votes pour cette catégorie",
 
   "arbitre.back": "← Retour au classement",
   "arbitre.category": "Catégorie",
@@ -184,8 +189,8 @@
   "voteForm.criteria.gestion": "Gestion du match",
   "voteForm.criteria.communication": "Communication",
   "voteForm.section.arbitre": "Performance de l’arbitre central",
-  "voteForm.section.var": "Intervention VAR",
-  "voteForm.section.assistant": "Travail des ",
+  "voteForm.section.var": "VAR",
+  "voteForm.section.assistant": "Assistants",
 
   "notFound.title": "Page non trouvée",
   "notFound.description": "La page que vous cherchez n'existe pas ou a été déplacée.",

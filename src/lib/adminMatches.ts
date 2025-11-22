@@ -7,6 +7,8 @@ export interface MatchUpdateInput {
   score_away?: number | null
   date?: string | null
   arbitre_id?: string | null
+  equipe_home?: string | null
+  equipe_away?: string | null
 }
 
 function parseDate(value?: string | null) {
@@ -102,6 +104,13 @@ export async function updateMatchAdmin(id: string, payload: MatchUpdateInput, le
   if (payload.arbitre_id !== undefined) {
     // Permettre de définir arbitre_id à null pour supprimer l'arbitre
     updateData.arbitre_id = payload.arbitre_id === null || payload.arbitre_id === '' ? null : payload.arbitre_id
+  }
+  // Mettre à jour les équipes
+  if (payload.equipe_home !== undefined) {
+    updateData.equipe_home_id = payload.equipe_home === null || payload.equipe_home === '' ? null : payload.equipe_home
+  }
+  if (payload.equipe_away !== undefined) {
+    updateData.equipe_away_id = payload.equipe_away === null || payload.equipe_away === '' ? null : payload.equipe_away
   }
 
   // Mettre à jour directement dans la base de données

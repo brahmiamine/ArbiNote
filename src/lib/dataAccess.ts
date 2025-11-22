@@ -291,4 +291,93 @@ export async function fetchFederationsWithLeagues() {
   }))
 }
 
+export async function fetchTopMatchesByCriteres(
+  matchIds: string[],
+  critereCategory: 'var' | 'assistant',
+  limit: number = 5
+) {
+  if (matchIds.length === 0) {
+    return []
+  }
+
+  const dataSource = await getDataSource()
+  
+  // Récupérer les critères de la catégorie
+  const critereRepo = dataSource.getRepository<CritereDefinitionEntity>('critere_definitions')
+  const criteres = await critereRepo.find({
+    where: { categorie: critereCategory },
+  })
+  const critereIds = criteres.map((c) => c.id)
+
+  if (critereIds.length === 0) {
+    return []
+  }
+
+  // Récupérer tous les votes pour ces matchs avec les relations
+  const voteRepo = dataSource.getRepository<Vote>('votes')
+  const votes = await voteRepo.find({
+    where: { match_id: In(matchIds) },
+    relations: ['match', 'match.journee', 'match.journee.saison', 'match.equipe_home', 'match.equipe_away', 'match.arbitre'],
+  })
+
+  // Grouper les votes par match et calculer la moyenne pour chaque critère
+  const matchScores = new Map<
+    string,
+    {
+      match: any
+      scores: number[]
+      voteCount: number
+    }
+  >()
+
+  votes.forEach((vote) => {
+    const matchId = vote.match_id
+    const criteresData = vote.criteres as Record<string, number>
+
+    // Calculer la moyenne des critères de la catégorie pour ce vote
+    const categoryScores: number[] = []
+    critereIds.forEach((critereId) => {
+      if (criteresData[critereId] !== undefined && criteresData[critereId] !== null) {
+        categoryScores.push(Number(criteresData[critereId]))
+      }
+    })
+
+    if (categoryScores.length === 0) return
+
+    const voteAverage = categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
+
+    if (!matchScores.has(matchId)) {
+      matchScores.set(matchId, {
+        match: vote.match,
+        scores: [],
+        voteCount: 0,
+      })
+    }
+
+    const matchData = matchScores.get(matchId)!
+    matchData.scores.push(voteAverage)
+    matchData.voteCount++
+  })
+
+  // Calculer la moyenne finale pour chaque match
+  const matchesWithAverages = Array.from(matchScores.entries())
+    .map(([matchId, data]) => {
+      const average =
+        data.scores.length > 0
+          ? data.scores.reduce((sum, score) => sum + score, 0) / data.scores.length
+          : 0
+
+      return {
+        match: toPlain(data.match),
+        average,
+        voteCount: data.voteCount,
+      }
+    })
+    .filter((item) => item.voteCount > 0) // Seulement les matchs avec au moins un vote
+    .sort((a, b) => b.average - a.average) // Trier par moyenne décroissante
+    .slice(0, limit) // Top N
+
+  return matchesWithAverages
+}
+
 

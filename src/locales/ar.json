@@ -153,6 +153,11 @@
   "classement.referee": "الحكم",
   "classement.globalNote": "المعدل العام",
   "classement.votesCount": "عدد التصويتات",
+  "classement.topMatchesSubtitle": "أفضل 5 مباريات",
+  "classement.topVarMatches": "أفضل تقييم VAR",
+  "classement.topAssistantMatches": "أفضل تقييم الحكام المساعدين",
+  "classement.voteCount": "{{count}} تصويت(ات)",
+  "classement.noMatchesForCategory": "لا توجد مباريات مع تصويتات لهذه الفئة",
 
   "arbitre.back": "← العودة إلى الترتيب",
   "arbitre.category": "التصنيف",
@@ -184,11 +189,9 @@
   "voteForm.criteria.gestion": "تسيير المباراة",
   "voteForm.criteria.communication": "التواصل",
   "voteForm.section.arbitre": "أداء الحكم الرئيسي",
-  "voteForm.section.var": "استخدام تقنية الفار",
-  "voteForm.section.assistant": "عمل الحكام المساعدين",
-
+  "voteForm.section.var": "تقنية الفار",
+  "voteForm.section.assistant": "الحكام المساعدين",
   "notFound.title": "الصفحة غير موجودة",
   "notFound.description": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
   "notFound.cta": "العودة إلى الصفحة الرئيسية"
 }
-

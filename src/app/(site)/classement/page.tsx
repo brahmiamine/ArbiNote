@@ -3,7 +3,8 @@ import RankingTable from '@/components/RankingTable'
 import { buildRanking } from '@/lib/rankings'
 import { CritereDefinition, Vote } from '@/types'
 import { getServerLocale, translate } from '@/lib/i18nServer'
-import { getLocalizedName } from '@/lib/utils'
+import { getLocalizedName, formatDateOnly } from '@/lib/utils'
+import TopMatchesList from '@/components/TopMatchesList'
 import {
   fetchArbitres,
   fetchCritereDefinitions,
@@ -11,6 +12,7 @@ import {
   fetchLatestSaison,
   fetchMatchesByJourneeIds,
   fetchVotesByMatchIds,
+  fetchTopMatchesByCriteres,
 } from '@/lib/dataAccess'
 import { getActiveLeagueId } from '@/lib/leagueSelection'
 
@@ -240,33 +242,32 @@ export default async function ClassementPage() {
         />
       </section>
 
-      <section className="space-y-4">
+      <section className="space-y-6">
         <div>
           <h2 className="text-2xl font-semibold mb-2">{t('classement.generalRankingTitle')}</h2>
           <p className="text-sm text-gray-500">{t('classement.generalRankingDescription')}</p>
         </div>
-        <RankingTable
-          entries={generalRanking}
-          criteres={generalCriteres}
-          locale={locale}
-          t={t}
-        />
-        {generalRanking[0] && (
-          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-            <p className="text-sm text-emerald-800 mb-1">{t('classement.bestArbitrageOverall')}</p>
-            <p className="text-2xl font-bold text-emerald-900">
-              {getLocalizedName(locale, {
-                defaultValue: generalRanking[0].nom,
-                fr: generalRanking[0].nom,
-                en: generalRanking[0].nom_en ?? undefined,
-                ar: generalRanking[0].nom_ar ?? undefined,
-              })}
-            </p>
-            <p className="text-sm text-emerald-700">
-              {t('common.globalNote')}: {generalRanking[0].moyenne.toFixed(2)} / 5
-            </p>
+
+        {/* Top 5 matchs VAR et Assistants */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Top 5 matchs VAR */}
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-wide text-gray-400">{t('classement.topMatchesSubtitle')}</p>
+              <h3 className="text-xl font-semibold text-gray-900">{t('classement.topVarMatches')}</h3>
+            </div>
+            <TopMatchesList matchIds={matchIds} category="var" locale={locale} t={t} />
           </div>
-        )}
+
+          {/* Top 5 matchs Assistants */}
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-wide text-gray-400">{t('classement.topMatchesSubtitle')}</p>
+              <h3 className="text-xl font-semibold text-gray-900">{t('classement.topAssistantMatches')}</h3>
+            </div>
+            <TopMatchesList matchIds={matchIds} category="assistant" locale={locale} t={t} />
+          </div>
+        </div>
       </section>
 
       <section className="space-y-3">

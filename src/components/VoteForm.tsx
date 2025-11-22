@@ -36,7 +36,7 @@ const fallbackCriteres: CritereDefinition[] = [
   {
     id: "assistant_collaboration",
     categorie: "assistant",
-    label_fr: "Travail des assistants",
+    label_fr: "Assistants",
     label_ar: "عمل الحكام المساعدين",
     description_fr: "Précision des hors-jeu et cohérence avec le central.",
     description_ar: "دقّة التسلل والانسجام مع الحكم الرئيسي.",
@@ -57,7 +57,7 @@ type CriteresState = Record<string, number>;
 export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs, matchDate, onSuccess }: VoteFormProps) {
   const { t, locale } = useTranslations();
   const criteresList = criteresDefs.length ? criteresDefs : fallbackCriteres;
-  
+
   const canVote = useMemo(() => {
     return canVoteMatch({ arbitre_id: arbitreId, date: matchDate });
   }, [arbitreId, matchDate]);
@@ -198,12 +198,8 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
             />
           </svg>
           <div className="flex-1">
-            <p className="text-green-800 font-medium mb-2">
-              {t("voteForm.success")}
-            </p>
-            <p className="text-sm text-green-700">
-              {t("voteForm.cannotChange")}
-            </p>
+            <p className="text-green-800 font-medium mb-2">{t("voteForm.success")}</p>
+            <p className="text-sm text-green-700">{t("voteForm.cannotChange")}</p>
           </div>
         </div>
       </div>
@@ -214,7 +210,7 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold mb-4">{t('matchDetail.voteTitle')}</h2>
+      <h2 className="text-2xl font-bold mb-4">{t("matchDetail.voteTitle")}</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <p className="text-sm text-blue-800">
@@ -222,74 +218,69 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
           </p>
         </div>
 
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm">{error}</p>
-        </div>
-      )}
-
-      <div className="space-y-6">
-        {Object.entries(groupedByCategory).map(([categorie, list]) => {
-          const sectionLabel =
-            categorie === "assistant"
-              ? t("voteForm.section.assistant")
-              : categorie === "var"
-              ? t("voteForm.section.var")
-              : t("voteForm.section.arbitre");
-
-          return (
-            <div key={categorie} className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">{sectionLabel}</h3>
-              {list.map((critere) => {
-                const label =
-                  locale === "ar"
-                    ? critere.label_ar
-                    : locale === "en"
-                    ? critere.label_en ?? critere.label_fr
-                    : critere.label_fr;
-                const description = locale === "ar" ? critere.description_ar : critere.description_fr;
-
-                return (
-                  <div key={critere.id} className="p-4 border border-gray-200 rounded-lg bg-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-gray-800">{label}</label>
-                      <span className="text-xs text-gray-500 uppercase">{critere.categorie}</span>
-                    </div>
-                    {description && <p className="text-xs text-gray-500 mb-3">{description}</p>}
-                    <StarsRating
-                      value={criteres[critere.id]}
-                      onChange={(value) =>
-                        setCriteres((prev) => ({
-                          ...prev,
-                          [critere.id]: value,
-                        }))
-                      }
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-
-      {noteGlobale > 0 && (
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <span className="font-medium text-gray-700">{t("voteForm.noteGlobal")}:</span>
-            <span className="text-2xl font-bold text-blue-600">{noteGlobale.toFixed(2)}/5</span>
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-800 text-sm">{error}</p>
           </div>
-        </div>
-      )}
+        )}
 
-      <button
-        type="submit"
-        disabled={isSubmitting || noteGlobale === 0 || !canVote}
-        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-      >
-        {isSubmitting ? t("voteForm.submitting") : t("voteForm.submit")}
-      </button>
-    </form>
+        <div className="space-y-6">
+          {Object.entries(groupedByCategory).map(([categorie, list]) => {
+            const sectionLabel =
+              categorie === "assistant"
+                ? t("voteForm.section.assistant")
+                : categorie === "var"
+                ? t("voteForm.section.var")
+                : t("voteForm.section.arbitre");
+
+            return (
+              <div key={categorie} className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">{sectionLabel}</h3>
+                {list.map((critere) => {
+                  const label = locale === "ar" ? critere.label_ar : locale === "en" ? critere.label_en ?? critere.label_fr : critere.label_fr;
+                  const description = locale === "ar" ? critere.description_ar : critere.description_fr;
+
+                  return (
+                    <div key={critere.id} className="p-4 border border-gray-200 rounded-lg bg-white">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-800">{label}</label>
+                        <span className="text-xs text-gray-500 uppercase">{critere.categorie}</span>
+                      </div>
+                      {description && <p className="text-xs text-gray-500 mb-3">{description}</p>}
+                      <StarsRating
+                        value={criteres[critere.id]}
+                        onChange={(value) =>
+                          setCriteres((prev) => ({
+                            ...prev,
+                            [critere.id]: value,
+                          }))
+                        }
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+
+        {noteGlobale > 0 && (
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-gray-700">{t("voteForm.noteGlobal")}:</span>
+              <span className="text-2xl font-bold text-blue-600">{noteGlobale.toFixed(2)}/5</span>
+            </div>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting || noteGlobale === 0 || !canVote}
+          className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          {isSubmitting ? t("voteForm.submitting") : t("voteForm.submit")}
+        </button>
+      </form>
     </div>
   );
 }

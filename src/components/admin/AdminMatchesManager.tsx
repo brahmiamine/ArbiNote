@@ -1,13 +1,15 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { Match, Journee, Arbitre } from '@/types'
+import type { Match, Journee, Arbitre, Team } from '@/types'
 
 type MatchEdit = {
   score_home: string
   score_away: string
   date: string
   arbitre_id: string
+  equipe_home: string
+  equipe_away: string
 }
 
 function toDateTimeInputValue(value: string | null | undefined) {
@@ -28,6 +30,8 @@ function buildEdit(match: Match): MatchEdit {
     score_away: match.score_away !== null && match.score_away !== undefined ? String(match.score_away) : '',
     date: toDateTimeInputValue(match.date),
     arbitre_id: match.arbitre_id ?? '',
+    equipe_home: match.equipe_home?.id ?? '',
+    equipe_away: match.equipe_away?.id ?? '',
   }
 }
 
@@ -35,6 +39,7 @@ export default function AdminMatchesManager() {
   const [matches, setMatches] = useState<Match[]>([])
   const [journees, setJournees] = useState<Journee[]>([])
   const [arbitres, setArbitres] = useState<Arbitre[]>([])
+  const [teams, setTeams] = useState<Team[]>([])
   const [edits, setEdits] = useState<Record<string, MatchEdit>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -59,6 +64,7 @@ export default function AdminMatchesManager() {
   useEffect(() => {
     loadJournees()
     loadArbitres()
+    loadTeams()
   }, [])
 
   useEffect(() => {
@@ -106,6 +112,21 @@ export default function AdminMatchesManager() {
       }
     } catch (err) {
       console.error('Error loading arbitres:', err)
+    }
+  }
+
+  async function loadTeams() {
+    try {
+      const response = await fetch('/api/admin/teams', {
+        cache: 'no-store',
+        credentials: 'include',
+      })
+      if (response.ok) {
+        const data = (await response.json()) as Team[]
+        setTeams(data)
+      }
+    } catch (err) {
+      console.error('Error loading teams:', err)
     }
   }
 
@@ -159,11 +180,17 @@ export default function AdminMatchesManager() {
     // Normaliser les valeurs vides pour la comparaison
     const baselineArbitreId = baseline.arbitre_id || ''
     const currentArbitreId = current.arbitre_id || ''
+    const baselineEquipeHome = baseline.equipe_home || ''
+    const currentEquipeHome = current.equipe_home || ''
+    const baselineEquipeAway = baseline.equipe_away || ''
+    const currentEquipeAway = current.equipe_away || ''
     return (
       baseline.score_home !== current.score_home ||
       baseline.score_away !== current.score_away ||
       baseline.date !== current.date ||
-      baselineArbitreId !== currentArbitreId
+      baselineArbitreId !== currentArbitreId ||
+      baselineEquipeHome !== currentEquipeHome ||
+      baselineEquipeAway !== currentEquipeAway
     )
   }
 
@@ -187,6 +214,8 @@ export default function AdminMatchesManager() {
         score_away: parseScore(edit.score_away),
         date: edit.date || null,
         arbitre_id: edit.arbitre_id === '' ? null : (edit.arbitre_id || null),
+        equipe_home: edit.equipe_home === '' ? null : (edit.equipe_home || null),
+        equipe_away: edit.equipe_away === '' ? null : (edit.equipe_away || null),
       }
       
       const response = await fetch(`/api/admin/matches/${match.id}`, {
@@ -281,10 +310,76 @@ export default function AdminMatchesManager() {
                   return (
                     <tr key={match.id} className="border-b last:border-0">
                       <td className="p-2">
-                        <div className="font-medium">
-                          {match.equipe_home.nom} vs {match.equipe_away.nom}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-1">
+                              {(() => {
+                                const selectedHomeTeam = teams.find(t => t.id === edit.equipe_home)
+                                return selectedHomeTeam?.logo_url ? (
+                                  <img
+                                    src={selectedHomeTeam.logo_url}
+                                    alt={selectedHomeTeam.nom}
+                                    className="w-6 h-6 object-contain"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement
+                                      target.style.display = 'none'
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400 font-semibold">
+                                    {selectedHomeTeam?.nom.charAt(0).toUpperCase() || '?'}
+                                  </div>
+                                )
+                              })()}
+                              <select
+                                value={edit.equipe_home}
+                                onChange={(e) => updateEdit(match.id, 'equipe_home', e.target.value)}
+                                className="border rounded px-2 py-1 text-sm flex-1 min-w-[120px]"
+                              >
+                                <option value="">Sélectionner...</option>
+                                {teams.map((team) => (
+                                  <option key={team.id} value={team.id}>
+                                    {team.nom}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <span className="text-gray-400 text-xs">vs</span>
+                            <div className="flex items-center gap-2 flex-1">
+                              {(() => {
+                                const selectedAwayTeam = teams.find(t => t.id === edit.equipe_away)
+                                return selectedAwayTeam?.logo_url ? (
+                                  <img
+                                    src={selectedAwayTeam.logo_url}
+                                    alt={selectedAwayTeam.nom}
+                                    className="w-6 h-6 object-contain"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement
+                                      target.style.display = 'none'
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400 font-semibold">
+                                    {selectedAwayTeam?.nom.charAt(0).toUpperCase() || '?'}
+                                  </div>
+                                )
+                              })()}
+                              <select
+                                value={edit.equipe_away}
+                                onChange={(e) => updateEdit(match.id, 'equipe_away', e.target.value)}
+                                className="border rounded px-2 py-1 text-sm flex-1 min-w-[120px]"
+                              >
+                                <option value="">Sélectionner...</option>
+                                {teams.map((team) => (
+                                  <option key={team.id} value={team.id}>
+                                    {team.nom}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500 font-mono truncate">{match.id}</div>
                         </div>
-                        <div className="text-xs text-gray-500 font-mono truncate">{match.id}</div>
                       </td>
                       <td className="p-2">
                         {match.journee ? (

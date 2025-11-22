@@ -153,6 +153,11 @@
   "classement.referee": "Referee",
   "classement.globalNote": "Overall grade",
   "classement.votesCount": "Votes",
+  "classement.topMatchesSubtitle": "Top 5 matches",
+  "classement.topVarMatches": "Best VAR rating",
+  "classement.topAssistantMatches": "Best Assistants rating",
+  "classement.voteCount": "{{count}} vote(s)",
+  "classement.noMatchesForCategory": "No matches with votes for this category",
 
   "arbitre.back": "← Back to rankings",
   "arbitre.category": "Category",
@@ -184,11 +189,10 @@
   "voteForm.criteria.gestion": "Game management",
   "voteForm.criteria.communication": "Communication",
   "voteForm.section.arbitre": "Main referee performance",
-  "voteForm.section.var": "VAR intervention",
-  "voteForm.section.assistant": "Assistant referees' work",
+  "voteForm.section.var": "VAR",
+  "voteForm.section.assistant": "Assistant referees",
 
   "notFound.title": "Page not found",
   "notFound.description": "The page you are looking for does not exist or has moved.",
   "notFound.cta": "Back to home"
 }
-

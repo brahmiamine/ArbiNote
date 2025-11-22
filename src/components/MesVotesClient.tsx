@@ -109,48 +109,53 @@ export default function MesVotesClient() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-6">{t("myVotes.title")}</h1>
-        <p className="text-gray-600">{t("common.loading")}</p>
+      <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-10">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">{t("myVotes.title")}</h1>
+        <p className="text-gray-600 dark:text-gray-400">{t("common.loading")}</p>
       </div>
     );
   }
 
   if (!fingerprint) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-6">{t("myVotes.title")}</h1>
-        <p className="text-gray-600">{t("myVotes.noFingerprint")}</p>
+      <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-10">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">{t("myVotes.title")}</h1>
+        <p className="text-gray-600 dark:text-gray-400">{t("myVotes.noFingerprint")}</p>
       </div>
     );
   }
 
   if (votesByJournee.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-6">{t("myVotes.title")}</h1>
-        <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
-          <p className="text-gray-600">{t("myVotes.noVotes")}</p>
+      <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-10">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">{t("myVotes.title")}</h1>
+        <div className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+          <p className="text-gray-600 dark:text-gray-400">{t("myVotes.noVotes")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
-      <h1 className="text-3xl font-bold">{t("myVotes.title")}</h1>
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-10 space-y-6 sm:space-y-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t("myVotes.title")}</h1>
 
       {votesByJournee.map((group) => (
-        <div key={group.key} className="space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900">
+        <div key={group.key} className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 dark:border-gray-700 pb-2 gap-2">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                 {t("common.matchday")} {group.journeeNumero}
               </h2>
 
-              {group.journeeDate && <p className="text-sm text-gray-500">{formatDateOnly(group.journeeDate, locale)}</p>}
+              {group.journeeDate && (
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{formatDateOnly(group.journeeDate, locale)}</p>
+              )}
             </div>
-            <Link href={`/journees/${group.journeeId}`} className="text-blue-600 text-sm font-medium hover:underline">
+            <Link
+              href={`/journees/${group.journeeId}`}
+              className="text-blue-600 dark:text-blue-400 text-xs sm:text-sm font-medium hover:underline flex-shrink-0"
+            >
               {t("journees.viewDetails")}
             </Link>
           </div>

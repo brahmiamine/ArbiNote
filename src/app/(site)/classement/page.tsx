@@ -28,9 +28,9 @@ export default async function ClassementPage() {
 
   if (!saison) {
     return (
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">{t('classement.title')}</h1>
-        <p className="text-gray-600">{t('classement.noSeason')}</p>
+      <div className="w-full max-w-3xl mx-auto px-2 sm:px-4">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">{t('classement.title')}</h1>
+        <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">{t('classement.noSeason')}</p>
       </div>
     )
   }
@@ -98,51 +98,51 @@ export default async function ClassementPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">{t('classement.title')}</h1>
-          <p className="text-gray-600">
+    <div className="w-full max-w-6xl mx-auto px-2 sm:px-4 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 text-gray-900 dark:text-white">{t('classement.title')}</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             {t('classement.seasonLabel')} {saison.nom}
           </p>
         </div>
         <Link
           href={`/saisons/${saison.id}`}
-          className="text-blue-600 hover:text-blue-800 text-sm"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs sm:text-sm flex-shrink-0"
         >
           {t('classement.viewDays')}
         </Link>
       </div>
 
       {/* Vue d'ensemble (StatsPanel) */}
-      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-lg">
+      <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800 p-4 sm:p-6 text-white shadow-lg">
         <p className="text-xs uppercase tracking-wide text-slate-300 mb-1">
           {t('home.stats.title', { season: statsSummary.seasonLabel })}
         </p>
-        <h3 className="text-2xl font-semibold mb-4">{statsSummary.seasonLabel}</h3>
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl bg-white/10 px-4 py-3">
+        <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 truncate">{statsSummary.seasonLabel}</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+          <div className="rounded-xl sm:rounded-2xl bg-white/10 px-2 sm:px-4 py-2 sm:py-3">
             <p className="text-xs uppercase tracking-wide text-slate-300">{t('home.stats.referees')}</p>
-            <p className="text-2xl font-bold">{statsSummary.totalReferees}</p>
+            <p className="text-xl sm:text-2xl font-bold">{statsSummary.totalReferees}</p>
           </div>
-          <div className="rounded-2xl bg-white/10 px-4 py-3">
+          <div className="rounded-xl sm:rounded-2xl bg-white/10 px-2 sm:px-4 py-2 sm:py-3">
             <p className="text-xs uppercase tracking-wide text-slate-300">{t('home.stats.matches')}</p>
-            <p className="text-2xl font-bold">{statsSummary.totalMatches}</p>
+            <p className="text-xl sm:text-2xl font-bold">{statsSummary.totalMatches}</p>
           </div>
-          <div className="rounded-2xl bg-white/10 px-4 py-3">
+          <div className="rounded-xl sm:rounded-2xl bg-white/10 px-2 sm:px-4 py-2 sm:py-3">
             <p className="text-xs uppercase tracking-wide text-slate-300">{t('home.stats.journees')}</p>
-            <p className="text-2xl font-bold">{statsSummary.totalJournees}</p>
+            <p className="text-xl sm:text-2xl font-bold">{statsSummary.totalJournees}</p>
           </div>
-          <div className="rounded-2xl bg-white/10 px-4 py-3">
+          <div className="rounded-xl sm:rounded-2xl bg-white/10 px-2 sm:px-4 py-2 sm:py-3">
             <p className="text-xs uppercase tracking-wide text-slate-300">{t('home.stats.votes')}</p>
-            <p className="text-2xl font-bold">{statsSummary.totalVotes}</p>
+            <p className="text-xl sm:text-2xl font-bold">{statsSummary.totalVotes}</p>
           </div>
         </div>
       </div>
 
       {/* Aperçu basé sur les dernières notes */}
-      <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.rankings.subtitle')}</p>
@@ -176,7 +176,7 @@ export default async function ClassementPage() {
             </ul>
           )}
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-xs uppercase tracking-wide text-gray-400">{t('home.rankings.subtitle')}</p>
@@ -251,7 +251,7 @@ export default async function ClassementPage() {
         {/* Top 5 matchs VAR et Assistants */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Top 5 matchs VAR */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm">
             <div className="mb-4">
               <p className="text-xs uppercase tracking-wide text-gray-400">{t('classement.topMatchesSubtitle')}</p>
               <h3 className="text-xl font-semibold text-gray-900">{t('classement.topVarMatches')}</h3>
@@ -260,7 +260,7 @@ export default async function ClassementPage() {
           </div>
 
           {/* Top 5 matchs Assistants */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-4 sm:p-6 shadow-sm">
             <div className="mb-4">
               <p className="text-xs uppercase tracking-wide text-gray-400">{t('classement.topMatchesSubtitle')}</p>
               <h3 className="text-xl font-semibold text-gray-900">{t('classement.topAssistantMatches')}</h3>

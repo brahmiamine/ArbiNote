@@ -9,7 +9,7 @@ import ArbitreLink from "./ArbitreLink";
 import VotedBadge from "./VotedBadge";
 
 function TeamDisplay({ team, align = "start", locale }: { team: Match["equipe_home"]; align?: "start" | "end"; locale: string }) {
-  const alignmentClasses = align === "end" ? "text-right flex-row-reverse" : "text-left";
+  const alignmentClasses = align === "end" ? "text-right flex-row-reverse sm:flex-row sm:text-right" : "text-left";
   const displayName = getLocalizedName(locale, {
     defaultValue: team.nom,
     fr: team.nom,
@@ -17,13 +17,13 @@ function TeamDisplay({ team, align = "start", locale }: { team: Match["equipe_ho
     ar: team.nom_ar ?? team.nom,
   });
   return (
-    <div className={`flex items-center gap-2 ${alignmentClasses}`}>
+    <div className={`flex items-center gap-1 sm:gap-2 ${alignmentClasses} min-w-0`}>
       {team.logo_url ? (
-        <div className="relative w-10 h-10">
-          <Image src={team.logo_url} alt={`Logo ${displayName}`} fill sizes="40px" className="object-contain" />
+        <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
+          <Image src={team.logo_url} alt={`Logo ${displayName}`} fill sizes="(max-width: 640px) 32px, 40px" className="object-contain" />
         </div>
       ) : (
-        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-semibold text-gray-600 dark:text-gray-400 flex-shrink-0">
           {team.nom
             .split(" ")
             .map((part) => part[0])
@@ -32,7 +32,7 @@ function TeamDisplay({ team, align = "start", locale }: { team: Match["equipe_ho
             .toUpperCase()}
         </div>
       )}
-      <span className="font-semibold text-gray-900">{displayName}</span>
+      <span className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate">{displayName}</span>
     </div>
   );
 }
@@ -108,9 +108,9 @@ export default function MatchCardClient({ match }: MatchCardClientProps) {
   return (
     <Link
       href={`/matches/${match.id}`}
-      className="block rounded-2xl border border-slate-200 p-4 hover:border-blue-200 hover:shadow-md transition"
+      className="block w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-3 sm:p-4 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md transition"
     >
-      <div className="flex items-center justify-between text-xs uppercase text-gray-400 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs uppercase text-gray-400 dark:text-gray-500 mb-2 gap-1">
         <span>
           {journeeLabel ? `${t("common.matchday")} ${journeeLabel}` : t("common.matchday")}
         </span>
@@ -119,26 +119,30 @@ export default function MatchCardClient({ match }: MatchCardClientProps) {
           <VotedBadge matchId={match.id} />
         </div>
       </div>
-      <div className="flex items-center justify-between gap-3">
-        <TeamDisplay team={match.equipe_home} locale={locale} />
-        <div className="text-center">
+      <div className="flex items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-0">
+        <div className="flex-1 min-w-0">
+          <TeamDisplay team={match.equipe_home} locale={locale} />
+        </div>
+        <div className="text-center flex-shrink-0 px-1 sm:px-2">
           {hasScore ? (
             <>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                 {match.score_home} - {match.score_away}
               </p>
-              <p className="text-xs text-gray-500">{t("common.finished")}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("common.finished")}</p>
             </>
           ) : (
             <>
-              <p className="text-lg font-semibold text-gray-400">VS</p>
-              <p className="text-xs text-gray-500">{t("common.upcoming")}</p>
+              <p className="text-base sm:text-lg font-semibold text-gray-400">VS</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("common.upcoming")}</p>
             </>
           )}
         </div>
-        <TeamDisplay team={match.equipe_away} align="end" locale={locale} />
+        <div className="flex-1 min-w-0 flex justify-end">
+          <TeamDisplay team={match.equipe_away} align="end" locale={locale} />
+        </div>
       </div>
-      <div className="text-xs text-gray-500 mt-3 flex items-center justify-between">
+      <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 sm:mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
         <span>{t("common.referee")}</span>
         {match.arbitre ? (
           <ArbitreLink arbitreId={match.arbitre.id} photoUrl={null} name={match.arbitre.nom} category={null} showPhoto={false} />

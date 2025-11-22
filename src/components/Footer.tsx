@@ -28,7 +28,7 @@ export default function Footer() {
   ]
 
   return (
-    <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-16">
+    <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-16 pb-20 md:pb-12">
       <div className="container mx-auto px-4 py-12">
         <div className="space-y-8">
           {/* Section Stories & analyses */}

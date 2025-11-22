@@ -33,7 +33,7 @@ export default function HomeClient({ upcoming }: HomeClientProps) {
   }, [federations, activeLeagueId]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10 space-y-12">
+    <div className="w-full max-w-6xl mx-auto px-2 sm:px-4 py-4 sm:py-10 space-y-6 sm:space-y-12">
       <header className="text-center space-y-3">
         {/* Logos de la fédération et de la ligue */}
         {activeLeague && (
@@ -86,18 +86,23 @@ export default function HomeClient({ upcoming }: HomeClientProps) {
         <p className="text-lg text-gray-600">{t("home.subtitle")}</p>
       </header>
 
-      <section className="max-w-4xl mx-auto">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">{t("home.upcoming.badge")}</p>
-              <h2 className="text-2xl font-semibold text-gray-900">
+      <section className="w-full max-w-4xl mx-auto">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-3 sm:p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{t("home.upcoming.badge")}</p>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white truncate">
                 {upcoming ? t("home.upcoming.title", { numero: upcoming.journee.numero.toString() }) : t("home.previous.title")}
               </h2>
-              {upcoming?.journee.date_journee && <p className="text-sm text-gray-500">{formatDate(upcoming.journee.date_journee, locale)}</p>}
+              {upcoming?.journee.date_journee && (
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{formatDate(upcoming.journee.date_journee, locale)}</p>
+              )}
             </div>
             {upcoming && (
-              <Link href={`/journees/${upcoming.journee.id}`} className="text-blue-600 text-sm font-medium hover:underline">
+              <Link
+                href={`/journees/${upcoming.journee.id}`}
+                className="text-blue-600 dark:text-blue-400 text-xs sm:text-sm font-medium hover:underline flex-shrink-0"
+              >
                 {t("home.upcoming.cta")}
               </Link>
             )}
@@ -132,24 +137,31 @@ function MatchCard({
   const hasScore = match.score_home !== null && match.score_home !== undefined && match.score_away !== null && match.score_away !== undefined;
 
   return (
-    <Link href={`/matches/${match.id}`} className="block rounded-2xl border border-slate-200 p-4 hover:border-blue-200 hover:shadow-md transition">
-      <div className="flex items-center justify-between text-xs uppercase text-gray-400 mb-2">
+    <Link
+      href={`/matches/${match.id}`}
+      className="block w-full rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800 p-3 sm:p-4 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md transition"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs uppercase text-gray-400 dark:text-gray-500 mb-2 gap-1">
         <span>
           {t("common.matchday")} {journeeNumber}
         </span>
         <span>{kickoff}</span>
       </div>
-      <div className="flex items-center justify-between gap-3">
-        <TeamDisplay team={match.equipe_home} locale={locale} />
-        <div className="text-center">
-          <p className="text-lg font-semibold text-gray-900">
+      <div className="flex items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-0">
+        <div className="flex-1 min-w-0">
+          <TeamDisplay team={match.equipe_home} locale={locale} />
+        </div>
+        <div className="text-center flex-shrink-0 px-1 sm:px-2">
+          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
             {hasScore ? `${match.score_home} - ${match.score_away}` : t("home.upcoming.notPlayed")}
           </p>
-          <p className="text-xs text-gray-500">{match.date ? t("home.upcoming.notPlayed") : t("common.datePending")}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{match.date ? t("home.upcoming.notPlayed") : t("common.datePending")}</p>
         </div>
-        <TeamDisplay team={match.equipe_away} align="end" locale={locale} />
+        <div className="flex-1 min-w-0 flex justify-end">
+          <TeamDisplay team={match.equipe_away} align="end" locale={locale} />
+        </div>
       </div>
-      <div className="text-xs text-gray-500 mt-3 flex items-center justify-between">
+      <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 sm:mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
         <span>{t("common.referee")}</span>
         {match.arbitre ? (
           <ArbitreLink arbitreId={match.arbitre.id} photoUrl={null} name={match.arbitre.nom} category={null} showPhoto={false} />
@@ -162,7 +174,7 @@ function MatchCard({
 }
 
 function TeamDisplay({ team, align = "start", locale }: { team: Match["equipe_home"]; align?: "start" | "end"; locale: string }) {
-  const alignmentClasses = align === "end" ? "text-right flex-row-reverse" : "text-left";
+  const alignmentClasses = align === "end" ? "text-right flex-row-reverse sm:flex-row sm:text-right" : "text-left";
   const displayName = getLocalizedName(locale, {
     defaultValue: team.nom,
     fr: team.nom,
@@ -170,13 +182,13 @@ function TeamDisplay({ team, align = "start", locale }: { team: Match["equipe_ho
     ar: team.nom_ar ?? team.nom,
   });
   return (
-    <div className={`flex items-center gap-2 ${alignmentClasses}`}>
+    <div className={`flex items-center gap-1 sm:gap-2 ${alignmentClasses} min-w-0`}>
       {team.logo_url ? (
-        <div className="relative w-10 h-10">
-          <Image src={team.logo_url} alt={`Logo ${displayName}`} fill sizes="40px" className="object-contain" />
+        <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
+          <Image src={team.logo_url} alt={`Logo ${displayName}`} fill sizes="(max-width: 640px) 32px, 40px" className="object-contain" />
         </div>
       ) : (
-        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-semibold text-gray-600 dark:text-gray-400 flex-shrink-0">
           {team.nom
             .split(" ")
             .map((part) => part[0])
@@ -185,7 +197,7 @@ function TeamDisplay({ team, align = "start", locale }: { team: Match["equipe_ho
             .toUpperCase()}
         </div>
       )}
-      <span className="font-semibold text-gray-900">{displayName}</span>
+      <span className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate">{displayName}</span>
     </div>
   );
 }

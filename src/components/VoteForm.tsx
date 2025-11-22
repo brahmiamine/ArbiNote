@@ -209,22 +209,22 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
   const noteGlobale = calculateNoteGlobale(criteres);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold mb-4">{t("matchDetail.voteTitle")}</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 sm:p-6 mb-6 w-full max-w-full overflow-x-hidden">
+      <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900 dark:text-white">{t("matchDetail.voteTitle")}</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-          <p className="text-sm text-blue-800">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+          <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200">
             {t("voteForm.intro")} <strong className="font-semibold">{arbitreNom}</strong>
           </p>
         </div>
 
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 text-sm">{error}</p>
+          <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-red-800 dark:text-red-200 text-xs sm:text-sm">{error}</p>
           </div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {Object.entries(groupedByCategory).map(([categorie, list]) => {
             const sectionLabel =
               categorie === "assistant"
@@ -234,19 +234,19 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
                 : t("voteForm.section.arbitre");
 
             return (
-              <div key={categorie} className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">{sectionLabel}</h3>
+              <div key={categorie} className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">{sectionLabel}</h3>
                 {list.map((critere) => {
                   const label = locale === "ar" ? critere.label_ar : locale === "en" ? critere.label_en ?? critere.label_fr : critere.label_fr;
                   const description = locale === "ar" ? critere.description_ar : critere.description_fr;
 
                   return (
-                    <div key={critere.id} className="p-4 border border-gray-200 rounded-lg bg-white">
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-medium text-gray-800">{label}</label>
-                        <span className="text-xs text-gray-500 uppercase">{critere.categorie}</span>
+                    <div key={critere.id} className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-1">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200">{label}</label>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">{critere.categorie}</span>
                       </div>
-                      {description && <p className="text-xs text-gray-500 mb-3">{description}</p>}
+                      {description && <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 sm:mb-3">{description}</p>}
                       <StarsRating
                         value={criteres[critere.id]}
                         onChange={(value) =>
@@ -265,10 +265,10 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
         </div>
 
         {noteGlobale > 0 && (
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="font-medium text-gray-700">{t("voteForm.noteGlobal")}:</span>
-              <span className="text-2xl font-bold text-blue-600">{noteGlobale.toFixed(2)}/5</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300 text-sm sm:text-base">{t("voteForm.noteGlobal")}:</span>
+              <span className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">{noteGlobale.toFixed(2)}/5</span>
             </div>
           </div>
         )}

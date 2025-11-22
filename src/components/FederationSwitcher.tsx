@@ -60,12 +60,12 @@ export default function FederationSwitcher({ variant = 'light' }: Props) {
   const buttonClasses = isDark
     ? 'flex w-full items-center justify-between rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30'
     : isAdmin
-      ? 'inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-sm'
+      ? 'inline-flex items-center gap-1 sm:gap-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-sm'
       : 'inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70'
 
   const dropdownClasses = isDark
-    ? 'absolute right-0 z-50 mt-2 w-96 rounded-lg border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl max-h-[80vh] overflow-y-auto'
-    : 'absolute right-0 z-50 mt-2 w-96 rounded-lg border border-gray-200 bg-white text-gray-900 shadow-xl max-h-[80vh] overflow-y-auto'
+    ? 'absolute right-0 z-[70] mt-2 w-80 sm:w-96 rounded-lg border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl max-h-[80vh] overflow-y-auto'
+    : 'absolute right-0 z-[70] mt-2 w-80 sm:w-96 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-xl max-h-[80vh] overflow-y-auto'
 
   const sectionTitleClass = isDark
     ? 'text-xs uppercase tracking-wide text-slate-400'
@@ -82,11 +82,12 @@ export default function FederationSwitcher({ variant = 'light' }: Props) {
   return (
     <div className="relative" ref={containerRef}>
       <button type="button" onClick={() => setOpen((prev) => !prev)} className={buttonClasses} aria-expanded={open}>
-        <span className="flex-1 text-left min-w-0">
-          <span className="block truncate">{activeLeagueLabel}</span>
+        <span className="flex-1 text-left min-w-0 hidden sm:block">
+          <span className="block truncate max-w-[120px] sm:max-w-none">{activeLeagueLabel}</span>
         </span>
+        <span className="sm:hidden text-xs">Ligue</span>
         <svg
-          className={`h-4 w-4 flex-shrink-0 transition-transform ${open ? 'translate-y-0.5 rotate-180' : ''}`}
+          className={`h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 transition-transform ${open ? 'translate-y-0.5 rotate-180' : ''}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"

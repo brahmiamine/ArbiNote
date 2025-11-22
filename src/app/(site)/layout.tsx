@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import MobileNavigation from '@/components/MobileNavigation'
+import CookieBanner from '@/components/CookieBanner'
 import { FederationProvider } from '@/components/FederationContext'
 import { fetchFederationsWithLeagues } from '@/lib/dataAccess'
 import { getActiveLeagueId } from '@/lib/leagueSelection'
@@ -28,6 +29,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       <main className="w-full max-w-full overflow-x-hidden px-2 sm:px-4 py-4 sm:py-8 pb-24 md:pb-8">{children}</main>
       <Footer />
       <MobileNavigation />
+      <CookieBanner />
     </FederationProvider>
   )
 }

@@ -11,13 +11,21 @@ const languages: { code: Locale; label: string }[] = [
 export default function LanguageSwitcher() {
   const { locale, switchLocale } = useTranslations()
 
+  const handleLanguageChange = (newLocale: Locale) => {
+    switchLocale(newLocale)
+    // Recharger complètement la page pour que tous les composants se rechargent avec la nouvelle langue
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
+  }
+
   return (
     <div className="flex items-center gap-2">
       {languages.map((lang) => (
         <button
           key={lang.code}
           type="button"
-          onClick={() => switchLocale(lang.code)}
+          onClick={() => handleLanguageChange(lang.code)}
           className={`px-3 py-1 rounded text-sm border transition ${
             locale === lang.code
               ? 'bg-blue-600 text-white border-blue-600'

@@ -279,6 +279,10 @@ export default function Navigation() {
                             onClick={() => {
                               switchLocale(lang.code);
                               setMobileMenuOpen(false);
+                              // Recharger complètement la page pour que tous les composants se rechargent avec la nouvelle langue
+                              setTimeout(() => {
+                                window.location.reload();
+                              }, 100);
                             }}
                             className={`w-full text-left px-3 py-2 rounded text-sm transition ${
                               locale === lang.code

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import StarsRating from "./StarsRating";
 import { hasVoted, markAsVoted } from "@/lib/voteProtection";
 import { roundNote, canVoteMatch } from "@/lib/utils";
@@ -56,6 +57,7 @@ type CriteresState = Record<string, number>;
 
 export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs, matchDate, onSuccess }: VoteFormProps) {
   const { t, locale } = useTranslations();
+  const router = useRouter();
   const criteresList = criteresDefs.length ? criteresDefs : fallbackCriteres;
 
   const canVote = useMemo(() => {
@@ -107,6 +109,29 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
     };
   }, []);
 
+  // Calculer le temps restant avant de pouvoir voter (doit être avant tout return conditionnel)
+  const timeUntilCanVote = useMemo(() => {
+    if (!matchDate || canVote) return null;
+    
+    try {
+      const matchStartDate = new Date(matchDate);
+      const now = new Date();
+      
+      if (matchStartDate > now) return null; // Match pas encore commencé
+      
+      const diffMs = now.getTime() - matchStartDate.getTime();
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      
+      if (diffMinutes < 30) {
+        return 30 - diffMinutes;
+      }
+    } catch {
+      return null;
+    }
+    
+    return null;
+  }, [matchDate, canVote]);
+
   const voteKey = fingerprint ? `${matchId}:${fingerprint}` : matchId;
   const alreadyVoted = hasVoted(voteKey);
 
@@ -116,6 +141,8 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
     const sum = values.reduce((acc, val) => acc + val, 0);
     return roundNote(sum / values.length);
   };
+
+  const noteGlobale = calculateNoteGlobale(criteres);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,11 +196,13 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
       markAsVoted(voteKey);
       setSuccess(true);
 
-      if (onSuccess) {
-        setTimeout(() => {
+      // Recharger la page pour actualiser les composants après un court délai
+      setTimeout(() => {
+        router.refresh();
+        if (onSuccess) {
           onSuccess();
-        }, 2000);
-      }
+        }
+      }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("common.error"));
     } finally {
@@ -205,31 +234,6 @@ export default function VoteForm({ matchId, arbitreId, arbitreNom, criteresDefs,
       </div>
     );
   }
-
-  const noteGlobale = calculateNoteGlobale(criteres);
-
-  // Calculer le temps restant avant de pouvoir voter
-  const timeUntilCanVote = useMemo(() => {
-    if (!matchDate || canVote) return null;
-    
-    try {
-      const matchStartDate = new Date(matchDate);
-      const now = new Date();
-      
-      if (matchStartDate > now) return null; // Match pas encore commencé
-      
-      const diffMs = now.getTime() - matchStartDate.getTime();
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      
-      if (diffMinutes < 30) {
-        return 30 - diffMinutes;
-      }
-    } catch {
-      return null;
-    }
-    
-    return null;
-  }, [matchDate, canVote]);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 sm:p-6 mb-6 w-full max-w-full overflow-x-hidden">

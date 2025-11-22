@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import VoteForm from "@/components/VoteForm";
-import AlreadyVotedSection from "@/components/AlreadyVotedSection";
+import VoteSectionWrapper from "@/components/VoteSectionWrapper";
 import { formatDate, getLocalizedName, canVoteMatch } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
@@ -240,23 +239,15 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
       </div>
 
       {arbitre && typeof arbitre === "object" && canVoteMatch(match as any) && (
-        <>
-          <VoteForm
-            matchId={match.id}
-            arbitreId={arbitre.id}
-            arbitreNom={refereeName ?? arbitre.nom}
-            criteresDefs={criteresDefinitions}
-            matchDate={match.date ? (typeof match.date === "string" ? match.date : match.date.toISOString()) : null}
-          />
-          <AlreadyVotedSection
-            matchId={match.id}
-            arbitreId={arbitre.id}
-            arbitreNom={refereeName ?? arbitre.nom}
-            arbitrePhotoUrl={arbitre.photo_url || null}
-            arbitreCategory={refereeCategory || null}
-            criteresDefs={criteresDefinitions}
-          />
-        </>
+        <VoteSectionWrapper
+          matchId={match.id}
+          arbitreId={arbitre.id}
+          arbitreNom={refereeName ?? arbitre.nom}
+          arbitrePhotoUrl={arbitre.photo_url || null}
+          arbitreCategory={refereeCategory || null}
+          criteresDefs={criteresDefinitions}
+          matchDate={match.date ? (typeof match.date === "string" ? match.date : match.date.toISOString()) : null}
+        />
       )}
 
       {(!arbitre || typeof arbitre !== "object") && (

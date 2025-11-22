@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import { getServerLocale } from "@/lib/i18nServer";
@@ -57,8 +58,10 @@ export default async function RootLayout({
 
   return (
     <html lang={initialLocale} dir={dir} suppressHydrationWarning>
-      <head>
-        <script
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -74,8 +77,6 @@ export default async function RootLayout({
             `,
           }}
         />
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
         <Providers initialLocale={initialLocale}>{children}</Providers>
       </body>
     </html>
